@@ -1,6 +1,7 @@
 import asyncio
 import json
 import websockets
+import random
 
 #Variables globales auquelles auront accès tous les joueurs
 connected = [] #Liste de tous les joueurs connectés définis par leur nom, leur websocket ainsi que leur statut
@@ -126,7 +127,11 @@ async def handler(websocket):
                     break
 
                 case 'playGeoHangman':
-                    print(name +' : playGeoHangman')
+                    print(name + ' : DEBUT DE PARTIE')
+                    if (isInGroupe == True):
+                        await playClassicModCoop(websocket)
+                    else:
+                        await playGeoHangmanSolo(websocket)
                     break
 
                 case 'joinGroupe':
@@ -176,22 +181,18 @@ async def handleGroupeJoining(name, websocket):
         print(name + ' : Notification de nouveau membre envoyé à '+ member.get('name'))
     
 
+#-------------------------------------------------------------------
+#----------------------JEU CLASSIQUE--------------------------------
+#-------------------------------------------------------------------
+
 # Fonction de jeu classique en groupe (Attention : on ne cherche plus les joueur dans la liste des connectés mais du groupe)
 async def playClassicModSolo(websocket):
     end = False
+    erreur = 0
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            event = json.loads(message)
-            index = event["index"]
-            letter = event["letter"]
-            print('Lettre bien receptionnée')
-            response = {
-            "type": "play",
-            "index": index,
-            "isInWord" : isInWord(letter),
-            "hiddenWord" : '- - - - - -'
-            }
+            response =  await manageLetter(message, erreur)
             print('Message de réponse bien construit')
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
@@ -199,25 +200,63 @@ async def playClassicModSolo(websocket):
 
 async def playClassicModCoop(websocket):
     end = False
+    erreur = 0
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            event = json.loads(message)
-            index = event["index"]
-            letter = event["letter"]
-            print('Lettre bien receptionnée')
-            response = {
-            "type": "play",
-            "index": index,
-            "isInWord" : isInWord(letter),
-            "hiddenWord" : '- - a - - -'
-            }
+            response =  await manageLetter(message, erreur)
             print('Message de réponse bien construit')
             for member in groupe:
                 await member.get('websocket').send(json.dumps(response))
             print('Message de réponse envoyé')
             break
 
+
+async def manageLetter(message, erreur):
+    event = json.loads(message)
+    index = event["index"]
+    letter = event["letter"]
+    response = {
+        "type": "play",
+        "index": index,
+        "isInWord" : isInWord(letter),
+        "hiddenWord" : '- - a - - -'
+    }
+    return response
+#-------------------------------------------------------------------
+#----------------------JEU GEO HANGMAN------------------------------
+#-------------------------------------------------------------------
+
+async def pickGeoToGuess():
+    #En premier, nous devons selectionner une zone geographique a faire deviner
+    lineToPick = random.randint(0, 49)
+    with open(r"./data/geohangman.txt", 'r') as fp:
+        for i, line in enumerate(fp):
+            # read line 4 and 7
+            if i == lineToPick:
+                return line
+
+async def playGeoHangmanSolo(websocket):
+    end = False
+    erreur = 0
+    geoLine = await pickGeoToGuess()
+    geoLine = geoLine.split(';')
+    hints = {
+        "type": "hints",
+        "first": geoLine[1],
+        "second" : geoLine[2],
+        "third" : geoLine[3]
+    }
+    await websocket.send(json.dumps(hints))
+    while end == False:
+        async for message in websocket:
+            print('Debut du tour')
+            response =  await manageLetter(message, erreur)
+            print('Message de réponse bien construit')
+            await websocket.send(json.dumps(response))
+            print('Message de réponse envoyé')
+            print('erreur = '+ str(erreur))
+            break 
 
 async def joinGroup(websocket):
     #mainPlayer.remove(websocket)

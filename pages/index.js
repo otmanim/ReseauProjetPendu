@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 import Login from '../components/login';
 import Home from '../components/home';
 import GameScreen from '../components/game';
+import GameScreenGeoHangman from '../components/gameGeoHangman';
 
 const client = new W3CWebSocket('ws://127.0.0.1:8001');
 //const client = new WebSocket('ws://127.0.0.1:8001')
@@ -25,6 +26,17 @@ export default function Controller() {
   const {gameManagement, setGameManagement} = useAppContext(); 
   gameManagement.websocket = client
 
+  function selectGameMod(step){
+    switch(step){
+      case 2 :
+        return 'playClassicMod'
+        break;
+      case 5 :
+        return 'playGeoHangman'
+        break;
+    }
+  }
+
 
   client.onmessage = (data) => {
     const event = JSON.parse(data.data);
@@ -33,22 +45,18 @@ export default function Controller() {
         gameManagement.newNotif.push({id: event.id, type : 'New Connection', content : event.player + ' join the server'})
         gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: ''})
         gameManagement.playerID = event.id
-        setGameManagement({...gameManagement})
         break;
       case "getPlayers":
         gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: event.inGroupOf})
-        setGameManagement({...gameManagement})
         break;
       case "groupeInvitation":
         gameManagement.newNotif.push({id: event.id, type : 'New Invitation', content : event.player + ' invite you in his groupe'})
-        setGameManagement({...gameManagement})
         break;
       case "newGroupe":
         gameManagement.playerList.map((player, index)=>{
           if(player.name == event.player)
             player.inGroupOf = event.player
         })
-        setGameManagement({...gameManagement})
         console.log('CREATION DE GROUPE DE '+ event.name)
         break;
       case "newMember":
@@ -57,25 +65,17 @@ export default function Controller() {
             player.inGroupOf = event.leader
         })
         gameManagement.isLeader = 'false'
-        setGameManagement({...gameManagement})
         console.log(gameManagement.playerList)
         break;
       case "gameModeChoice":
         gameManagement.step = event.game
         console.log('On verifie le jeu selectionne, il s\'agit du ' + event.game)
-        switch(event.game){
-          case 2 :
-            console.log('Pret pour jouer au mode classique !')
-            const choice = {
-              choice: 'playClassicMod'
-            };
-            gameManagement.websocket.send(JSON.stringify(choice))
-            console.log('Procédure terminée!')
-            break
-          default :
-            break
-        }
-        setGameManagement({...gameManagement})
+        console.log('Pret pour jouer au mode classique !')
+        const choice = {
+          choice: selectGameMod(event.game)
+        };
+        gameManagement.websocket.send(JSON.stringify(choice))
+        console.log('Procédure terminée!')
         break;
       case "play":
         gameManagement.gameStatut[0].clavier[event.index].inWord = event.isInWord
@@ -83,11 +83,14 @@ export default function Controller() {
           gameManagement.nbError += 1
         }
         gameManagement.hiddenWord = event.hiddenWord
-        setGameManagement({...gameManagement})
+        break;
+      case "hints":
+        gameManagement.hints = [event.first, event.second, event.third]
         break;
       default:
         throw new Error(`Unsupported event type: ${event.type}.`);
     }
+    setGameManagement({...gameManagement})
   };
   
   
@@ -101,6 +104,7 @@ export default function Controller() {
         {gameManagement.step === 0 && <Login client={client}/>}
         {gameManagement.step === 1 && <Home/>}
         {gameManagement.step === 2 && <GameScreen client={client}/>}
+        {gameManagement.step === 5 && <GameScreenGeoHangman client={client}/>}
       </div>
     )
 }

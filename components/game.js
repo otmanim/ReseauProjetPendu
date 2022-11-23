@@ -3,7 +3,7 @@ import { useAppContext } from '../pages/_app';
 
 
 export default function GameScreen({client}) {
-
+//ATTENTION MON POTE FAIT GAFFE : SI LE CLAVIER EST PAS RESET AVANT CHAQUE DEBUT DE PARTIE
     const {gameManagement, setGameManagement} = useAppContext();
 
     const handleClick = (event, letter, clavier, index) => {
@@ -133,9 +133,9 @@ export default function GameScreen({client}) {
       const pendu = [socle, poutreVerticale, poutreHorizontale, corde, tete, corps, brasDroit, brasGauche, jambeDroite, jambeGauche]
 
     return (
-        <div className="h-full">
+        <div className="bg-gradient-to-r from-button-home-1 to-button-home-2 h-full">
             <div className="flex h-1/2">
-                <div className="bg-red-600 w-1/2">
+                <div className="w-1/2">
                     {pendu.slice(0, gameManagement.nbError).map(
                             (item) => <div style={item} ></div>
                     )}
@@ -153,6 +153,10 @@ export default function GameScreen({client}) {
                             {letter.inWord === 'n' && <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} disabled className="bg-red-200 text-red-600 text-5xl w-24 h-24 rounded-xl ml-2 mb-5"> {letter.letter} </motion.button>}
                         </div>
                     )}
+                </div>
+                <div className="flex ml-[500px]">
+                  <input className="w-80 h-10 text-3xl text-center rounded-tl-full rounded-bl-full" type={'text'}/>
+                  <button className="bg-black text-white w-24 h-10 rounded-tr-full rounded-br-full text-xl font-bold">Send</button>
                 </div>
             </div>
         </div>

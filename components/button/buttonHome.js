@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { useAppContext } from '../../pages/_app';
 
 export default function ButtonHome({title, balise, step}) {
 
     const {gameManagement, setGameManagement} = useAppContext(); 
+    const [statutPlayer, setStatutPLayer] = useState('');
 
     function play() {
         gameManagement.playerStatut = 'ingame'
@@ -16,11 +18,15 @@ export default function ButtonHome({title, balise, step}) {
       }
 
     return (
+        <div>
+        {(statutPlayer == '' || statutPlayer == gameManagement.name) &&
         <motion.button 
             whileHover={{ scale: 1.1 }}
             className="bg-gradient-to-r from-button-home-1 to-button-home-2 w-[10rem] rounded-full border-2 border-white ml-[10%] mt-[10%]"
             onClick={play} >
             <h1 className='font-bold text-white text-xl py-2'>{title}</h1>
         </motion.button>
+        }
+        </div>
     )
 }

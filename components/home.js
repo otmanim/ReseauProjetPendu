@@ -28,7 +28,7 @@ export default function Home() {
                     <h1 className="font-bold text-lg ml-[10%] mt-[10%]">SOLO MODE</h1>
                     <h1 className="font-bold text-4xl ml-[10%]">CHALLENGE THE SERVER</h1>
                     <h1 className="text-sm ml-[10%] w-[80%]">Special mode where the server try to guess your own word.</h1>
-                    <ButtonHome title={'PLAY'}/>
+                    <ButtonHome title={'PLAY'} balise={'playVersusServer'} step={3}/>
                 </div>
             </div>
             <div className="flex">
@@ -58,7 +58,7 @@ export default function Home() {
                                 <h1 className="font-bold">SOLO AND MULTI MODE</h1>
                                 <h1 className="font-bold text-3xl">BEAT THE TIME</h1>
                                 <h1 className="w-[90%]">Try to gess the word before the end of the time</h1>
-                                <ButtonHome title={'PLAY'}/>
+                                <ButtonHome title={'PLAY'} balise={'playWithTime'} step={4}/>
                             </div>
                         </div>
                         <div className="bg-application-secondary ml-[5%] rounded-xl mt-[5%] w-[45%]">
@@ -69,7 +69,7 @@ export default function Home() {
                                 <h1 className="font-bold">SOLO AND MULTI MODE</h1>
                                 <h1 className="font-bold text-3xl">GEOHANGMAN</h1>
                                 <h1 className="w-[90%]">Try to guess the hidden country with the help of hints. </h1>
-                                <ButtonHome title={'PLAY'}/>
+                                <ButtonHome title={'PLAY'} balise={'playGeoHangman'} step={5}/>
                                 <p className="text-application-secondary">Ecart</p>
                             </div>
                         </div>

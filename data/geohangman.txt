@@ -1,0 +1,50 @@
+Kosovo;Pays;Europe;Pristina
+Slovenie;Pays;Europe;Ljubljana
+Algerie;Pays;Afrique;Alger
+Niger;Pays;Afrique;Niamey
+Bahamas;Pays;Amerique du nord; Nassau
+Tuvalu;Pays;Australie;Funafuti
+Turkmenistan;Pays;Asie;Ashgabat
+Mauritanie;Pays;Afrique;Nouakchott
+Bhoutan;Pays;Asie;Thimphu
+Egypte;Pays;Afrique;Cairo
+Espagne;Pays;Europe:Madrid
+Burundi;Pays;Afrique;
+Kiribati;Pays;Australie;Tarawa
+Namibie;Pays;Afrique;Windhoek
+Groenland;Pays;Amerique du nord; Nuuk
+Lituanie;Pays;Europe;Vilnius
+Venezuela;Pays;Amerique du sud;Caracas
+Guyane;Pays;Amerique du sud;Georgetown
+Kazakhstan;Pays;Asie;Astana
+Ouzbékistan;Pays;Asie;Tashkent
+Titiwangsa;Montagne;Asie;Malaisie
+Vindhya;Montagne;Asie;Inde
+Ardennes;Montagne;Europe;France
+Drakensberg;Montagne;Afrique;Lesotho
+Rhodopes;Montagne;Europe;Bulgarie
+Aleoutienne;Montagne;Amerique du nord;USA
+Cambriens;Montagne;Europe;Royaume-uni
+Mackenzie;Montagne;Amerique du nord;Canada
+Rwenzori;Montagne;Afrique;Ouganda
+Swartberg;Montagne;Afrique; Afrique du nord
+Laurentides;Montagnes;Amerique du nord;Canada
+Baltique;Mer;Ocean Atlantique;Allemange-Danemark-Finlande-...
+Tyrrhénienne;Mer;Ocean Atlantique;Italie-France
+Skagerrak;Detroit;Ocean Atlantique;Norvege-Danemark-Suede
+Gascogne;Golfe;Ocean Atlantique;France-Espagne
+Kattegat;Detroit;Ocean Atlantique;Danemark-Suede
+Beaufort;Mer;Ocean Arctique;Canada-USA
+Tchouktches;Mer;Ocean Arctique;Russie-USA
+Laptev;Mer;Ocean Arctique;Russie
+Bellingshausen;Mer;Ocean Antarctique;Antarctique
+Mawson;Mer;Ocean Antarctique;Antarctique
+Weddell;Mer;Ocean Antarctique;Antarctique
+Andaman;Mer;Ocean Indien;Inde-Birmanie-Indonesie-...
+Mozambique;Canal;Ocean Indien;Mozambique-Madagascar
+Persique;Golfe;Ocean Indien;Irak-Iran-Koweit-...
+Bismarck;Mer;Ocean Pacifique;Papouasie
+Halmahera;Mer;Ocean Pacifique;Indonesie
+Moluques;Mer;Ocean Pacifique;Indonesie
+Macassar;Detroit;Ocean Pacifique;Indonesie
+Bering;Mer;Ocean Pacifique;Russie-USA
