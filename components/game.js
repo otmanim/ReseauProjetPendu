@@ -140,8 +140,12 @@ export default function GameScreen({client}) {
                             (item) => <div style={item} ></div>
                     )}
                 </div>
-                <div className="w-1/2">
-                    <p className="font-bold text-white text-7xl mt-36 ml-32">{gameManagement.hiddenWord}</p>
+                <div className="w-1/2 flex mt-40 ml-40">
+                  {gameManagement.hiddenWord.map((i) => 
+                        <div className="bg-white w-16 h-16 rounded-xl text-center text-3xl font-bold pt-2 ml-2">
+                            <h1>{i}</h1>
+                        </div>
+                    )}
                 </div>
             </div>
             <div>

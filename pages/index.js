@@ -82,7 +82,7 @@ export default function Controller() {
         if (event.isInWord === "n") {
           gameManagement.nbError += 1
         }
-        gameManagement.hiddenWord = event.hiddenWord
+        gameManagement.hiddenWord = event.hiddenWord.split(' ')
         break;
       case "hints":
         gameManagement.hints = [event.first, event.second, event.third]

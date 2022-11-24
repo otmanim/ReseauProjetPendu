@@ -19,7 +19,7 @@ function MyApp({ Component, pageProps }) {
     gameStatut : [],
     mainPlayer : '',
     step : 0,
-    hiddenWord : '',
+    hiddenWord : [],
     nbError : 0,
     hints : [],
   })
