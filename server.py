@@ -223,6 +223,11 @@ async def playClassicModSolo(websocket, name):
     updateGameString(name, gameStringSolo, False)
     end = False
     erreur = 0
+    wordToSend = {
+        "type": "word",
+        "word": gameStringSolo,
+    }
+    await websocket.send(json.dumps(wordToSend))
     while incorrectGuesses <= 7:
         async for message in websocket:
             print('Debut du tour')

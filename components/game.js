@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
 import { useAppContext } from '../pages/_app';
+import EndGameScreen from "./endGame";
 
 
 export default function GameScreen({client}) {
@@ -134,6 +135,7 @@ export default function GameScreen({client}) {
 
     return (
         <div className="bg-gradient-to-r from-button-home-1 to-button-home-2 h-full">
+          {gameManagement.nbEssaisRestants == 0 && <EndGameScreen status={'perdu'} clavier={clavier} />}
             <div className="flex h-1/2">
                 <div className="w-1/2">
                     {pendu.slice(0, gameManagement.nbError).map(
@@ -149,8 +151,11 @@ export default function GameScreen({client}) {
                 </div>
             </div>
             <div>
-              <div>
-                <h1>Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
+              <div className="flex">
+                <h1 className="text-white font-bold text-xl ml-[15%]">Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
+                <div className="bg-red-200 w-80 text-center rounded-full ml-[40%]">
+                  <h1 className="font-bold text-xl text-red-600">C'est au tour de Joueur !</h1>
+                </div>
               </div>
                 <div className="flex flex-wrap ml-10 mt-16">
                     {gameManagement.gameStatut[0].clavier.map((letter,i) => 

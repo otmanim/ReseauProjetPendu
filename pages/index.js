@@ -88,6 +88,9 @@ export default function Controller() {
       case "hints":
         gameManagement.hints = [event.first, event.second, event.third]
         break;
+      case "word":
+        gameManagement.hiddenWord = event.word.split('')
+        break;
       default:
         throw new Error(`Unsupported event type: ${event.type}.`);
     }
