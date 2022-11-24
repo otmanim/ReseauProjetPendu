@@ -219,13 +219,13 @@ async def playClassicModSolo(websocket, name):
     gameStringSolo = ""
     for i in range(len(word)):
         gameStringSolo += "-"
-    updateGameStringSolo(name, gameStringSolo)
+    updateGameString(name, gameStringSolo, False)
     end = False
     erreur = 0
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            response = await manageLetterSolo(message, name, word)
+            response = await manageLetter(message, name, word, False)
             print('Message de réponse bien construit')
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
@@ -239,19 +239,18 @@ async def playClassicModCoop(websocket, name):
         groupWord = randomWord()
     print("LE MOT EST " + groupWord)
     # word = randomWord()
-    global gameString
+    gameString = ''
+    for i in range(len(groupWord)):
+        gameString += "-"
     for member in groupe:
         print(member['role'] + " : " + member['name'])
-        if member['role'] == 'leader':
-            if member['name'] == name:
-                for i in range(len(groupWord)):
-                    gameString += "-"
+        member['word'] = gameString
     end = False
     erreur = 0
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            response = await manageLetterCoop(message, erreur)
+            response = await manageLetter(message, erreur, groupWord, True)
             print('Message de réponse bien construit')
             for member in groupe:
                 await member.get('websocket').send(json.dumps(response))
@@ -259,15 +258,15 @@ async def playClassicModCoop(websocket, name):
             break
 
 
-async def manageLetterSolo(message, name, word):
+async def manageLetter(message, name, word, coop):
     event = json.loads(message)
     index = event["index"]
     letter = event["letter"]
     response = {
         "type": "play",
         "index": index,
-        "isInWord": isInWord(letter, name, word),
-        "hiddenWord": getGameStringSolo(name)
+        "isInWord": isInWord(letter, name, word, coop),
+        "hiddenWord": getGameString(name, coop)
     }
     return response
 
@@ -331,16 +330,16 @@ async def joinGroup(websocket):
         await connection.send()
 
 
-def isInWord(letter, name, word):
+def isInWord(letter, name, word, coop):
     global incorrectGuesses
     gameString = ""
     if letter in word:
-        gameString = list(getGameStringSolo(name))
+        gameString = list(getGameString(name, False))
         for i in range(len(word)):
             if word[i] == letter:
                 gameString[i] = letter
         gameString = ''.join(gameString)
-        updateGameStringSolo(name, gameString)
+        updateGameString(name, gameString, coop)
         return 'y'
     else:
         incorrectGuesses += 1
@@ -351,18 +350,25 @@ def randomWord():
     return words[random.randint(0, 14)]
 
 
-def updateGameStringSolo(name, gameStringSolo):
-    for player in connected:
-        if player['name'] == name:
-            # print("le name : " + name)
-            player["word"] = gameStringSolo
+def updateGameString(name, gameStringSolo, coop):
+    if coop == False :
+        for player in connected:
+            if player['name'] == name:
+                # print("le name : " + name)
+                player["word"] = gameStringSolo
+    else :
+        for member in groupe:
+            member['word'] = gameStringSolo
 
 
-def getGameStringSolo(name):
-    for player in connected:
-        if player['name'] == name:
-            # print("le name : " + name)
-            return player['word']
+def getGameString(name, coop):
+    if coop == False:
+        for player in connected:
+            if player['name'] == name:
+                # print("le name : " + name)
+                return player['word']
+    else :
+        return groupe[0]['word']
 
 
 async def main():
