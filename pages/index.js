@@ -81,6 +81,7 @@ export default function Controller() {
         gameManagement.gameStatut[0].clavier[event.index].inWord = event.isInWord
         if (event.isInWord === "n") {
           gameManagement.nbError += 1
+          gameManagement.nbEssaisRestants = event.nbEssaisRestants
         }
         gameManagement.hiddenWord = event.hiddenWord.split('')
         break;

@@ -21,6 +21,7 @@ function MyApp({ Component, pageProps }) {
     step : 0,
     hiddenWord : [],
     nbError : 0,
+    nbEssaisRestants : 8,
     hints : [],
   })
 

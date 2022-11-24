@@ -149,6 +149,9 @@ export default function GameScreen({client}) {
                 </div>
             </div>
             <div>
+              <div>
+                <h1>Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
+              </div>
                 <div className="flex flex-wrap ml-10 mt-16">
                     {gameManagement.gameStatut[0].clavier.map((letter,i) => 
                         <div className="">
