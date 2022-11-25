@@ -10,6 +10,7 @@ import Login from '../components/login';
 import Home from '../components/home';
 import GameScreen from '../components/game';
 import GameScreenGeoHangman from '../components/gameGeoHangman';
+import GameScreenServer from '../components/gameServer';
 
 const client = new W3CWebSocket('ws://127.0.0.1:8001');
 //const client = new WebSocket('ws://127.0.0.1:8001')
@@ -30,6 +31,9 @@ export default function Controller() {
     switch(step){
       case 2 :
         return 'playClassicMod'
+        break;
+      case 3 :
+        return 'playVersusServer'
         break;
       case 5 :
         return 'playGeoHangman'
@@ -85,6 +89,19 @@ export default function Controller() {
         }
         gameManagement.hiddenWord = event.hiddenWord.split('')
         break;
+      case "playServer":
+        gameManagement.potentialWords = event.motPossibles
+        gameManagement.hiddenWord = event.hiddenWord.split('')
+        if (event.isInWord === "n") {
+          gameManagement.nbError += 1
+          gameManagement.nbEssaisRestants = event.nbEssaisRestants
+        }
+        gameManagement.gameStatut[0].clavier.map((lettre,i)=>{
+          if(lettre.letter == event.letter)
+            lettre.inWord = event.isInWord
+
+        })
+        break;
       case "hints":
         gameManagement.hints = [event.first, event.second, event.third]
         break;
@@ -108,6 +125,7 @@ export default function Controller() {
         {gameManagement.step === 0 && <Login client={client}/>}
         {gameManagement.step === 1 && <Home/>}
         {gameManagement.step === 2 && <GameScreen client={client}/>}
+        {gameManagement.step === 3 && <GameScreenServer client={client}/>}
         {gameManagement.step === 5 && <GameScreenGeoHangman client={client}/>}
       </div>
     )

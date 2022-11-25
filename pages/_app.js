@@ -23,6 +23,7 @@ function MyApp({ Component, pageProps }) {
     nbError : 0,
     nbEssaisRestants : 8,
     hints : [],
+    potentialWords : [],
   })
 
   return (

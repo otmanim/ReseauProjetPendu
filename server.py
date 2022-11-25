@@ -2,6 +2,7 @@ import asyncio
 import json
 import websockets
 import random
+import time
 
 # Variables globales auquelles auront accès tous les joueurs
 connected = []  # Liste de tous les joueurs connectés définis par leur nom, leur websocket ainsi que leur statut
@@ -141,6 +142,7 @@ async def handler(websocket):
 
                 case 'playVersusServer':
                     print(name + ' : Jeu contre le server')
+                    await playVersusServer(websocket)
                     break
 
                 case 'playWithTime':
@@ -280,6 +282,146 @@ async def manageLetter(message, name, word, coop, incorrectGuesses):
     }
     return response
 
+# -------------------------------------------------------------------
+# ----------------------JEU VERSUS SERVER----------------------------
+# -------------------------------------------------------------------
+
+async def playVersusServer(websocket):
+    indexLettre = 0
+    clavierSelonFrenquence = ['e','a','i','s','n','r','t','o','l','u','d','c','m','p','g','b','v','h','f','q','y','x','j','k','w','z',]
+    message = await websocket.recv()
+    event = json.loads(message)
+    mot = event["word"]
+    listeMotASurveiller = []
+    tailleListe = 0
+    nbVoyellesTrouvees = 0
+    motCache = ''
+    lettresTrouvees = 0
+    lettresRestantes = 0
+    presentDansMot = 'n'
+    win = False
+    erreur = 0
+    file = open('./data/dictionnaire.txt', "r")
+    lines = file.readlines()
+    file.close()
+    for line in lines:
+        listeMotASurveiller.append(line.strip().lower())
+    existe = False
+    while existe == False:
+        if mot.lower() in listeMotASurveiller: 
+            print('Votre mot est : ' + mot)
+            existe = True
+        else:
+            print('Votre mot n\'existe pas, veuillez en choisir un autre.')
+    print('Il contient : ' + str(len(mot)) + " lettres")
+    print('\n')
+    listeMotASurveiller = []
+    for line in lines:
+        if len(line)-1 == len(mot):
+            line = line.lower().strip()
+            listeMotASurveiller.append(line)
+    tailleListe = len(listeMotASurveiller)
+    for i in range(len(mot)):
+        motCache += "-"
+    #Boucle principale
+    while win == False:
+        listeMotEnvoyer = []
+        if len(listeMotASurveiller) > 1:
+            time.sleep(2)
+        else:
+            time.sleep(1)
+        lettresTrouvees = compteurLettresTrouvees(motCache)
+        lettresRestantes = len(mot) - lettresTrouvees
+        if lettresRestantes == 0:
+            win = True
+            print('Vous avez gagné !')
+        if win == False :
+            lettre = clavierSelonFrenquence[indexLettre]
+            while not verifLettreUtile(listeMotASurveiller, lettre):
+                indexLettre += 1
+                lettre = clavierSelonFrenquence[indexLettre]
+            if lettre in mot:
+                motCache = changerMotCache(lettre, motCache, mot)
+                presentDansMot = 'y'
+            else:
+                erreur += 1
+                presentDansMot = 'n'
+            lettresTrouvees = compteurLettresTrouvees(motCache)
+            listeMotASurveiller = miseAJourListeSurveiller(listeMotASurveiller, motCache, lettresTrouvees)
+            indexLettre += 1
+            print('Tentative avec : ' + lettre)
+            print(motCache)
+            print('Erreurs : '+ str(erreur))
+            if (len(listeMotASurveiller) > 6):
+                listeMot = listeMotASurveiller[0]
+                listeMotEnvoyer.append(listeMotASurveiller[0])
+                for i in range(1,6):
+                    listeMot += ', '+ listeMotASurveiller[i]
+                    listeMotEnvoyer.append(listeMotASurveiller[i])
+                listeMotEnvoyer.append('et '+ str(len(listeMotASurveiller) - 6) + ' autres mots.')
+                print('Mots correspondants : ' +listeMot+ ' et '+ str(len(listeMotASurveiller) - 6) + ' autres mots.' )
+            else:
+                listeMot = listeMotASurveiller[0]
+                listeMotEnvoyer.append(listeMotASurveiller[0])
+                for i in range(1, len(listeMotASurveiller)):
+                    listeMot += ', '+ listeMotASurveiller[i]
+                    listeMotEnvoyer.append(listeMotASurveiller[i])
+                print('Mots correspondants : ' +listeMot+ '.')
+            response = {
+                "type": "playServer",
+               "letter": lettre,
+                "isInWord": presentDansMot,
+                "hiddenWord": motCache,
+                "nbEssaisRestants": 7-erreur,
+                "motPossibles" : listeMotEnvoyer
+            }
+            await websocket.send(json.dumps(response))
+            print('\n')
+    
+
+def verifLettreDansMot(lettre, mot, i):
+    mot = list(mot)
+    if lettre == mot[i]:
+        return True
+    else:
+        return False
+
+def changerMotCache(lettre, motCache, mot):
+    motCache = list(motCache)
+    mot = list(mot)
+    for i in range(len(mot)):
+        if mot[i] == lettre:
+            motCache[i] = lettre
+    motCache = ''.join(motCache)
+    return motCache
+
+def compteurLettresTrouvees(motCache):
+    compteur = 0
+    motCache = list(motCache)
+    for i in range(len(motCache)):
+        if motCache[i] == '-':
+            compteur += 1
+    return len(motCache) - compteur
+
+def miseAJourListeSurveiller(listeMotASurveiller, motCache, lettresTrouvees):
+    nouvelleListe = []
+    for dico in listeMotASurveiller:
+        compteur = 0
+        dicoListe = list(dico)
+        motCache = list(motCache)
+        for i in range(len(motCache)):
+            if motCache[i] != '-':
+                if motCache[i] == dicoListe[i]:
+                    compteur += 1
+            if compteur == lettresTrouvees:
+                nouvelleListe.append(dico)
+                break
+    return nouvelleListe       
+
+def verifLettreUtile(listeMotASurveiller, lettre):
+    for mot in listeMotASurveiller:
+        if lettre in mot:
+            return True
 
 # -------------------------------------------------------------------
 # ----------------------JEU GEO HANGMAN------------------------------
