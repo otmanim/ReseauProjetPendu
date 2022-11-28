@@ -12,7 +12,7 @@ function MyApp({ Component, pageProps }) {
     isLeader: '',
     groupeLeader : '',
     newNotif : [],
-    difficulty : 'easy',
+    difficulty : 'MEDIUM',
     playerID : 'test',
     playerStatut : "available",
     games : [],

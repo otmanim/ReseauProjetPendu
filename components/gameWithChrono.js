@@ -1,32 +1,20 @@
 import { motion } from "framer-motion"
-import { useState } from "react";
 import { useAppContext } from '../pages/_app';
+import EndGameScreen from "./endGame";
+import Timer from "./Timer";
 
 
-export default function GameScreenGeoHangman({client}) {
-
+export default function GameScreenChrono({client}) {
+//ATTENTION MON POTE FAIT GAFFE : SI LE CLAVIER EST PAS RESET AVANT CHAQUE DEBUT DE PARTIE
     const {gameManagement, setGameManagement} = useAppContext();
-    const [hintShared, setHintShared] = useState(0);
-    const [type3eIndice, setType3eIndice] = useState('');
 
     const handleClick = (event, letter, clavier, index) => {
-      const play = {
-          index: index,
-          letter: letter,
-        };
-        client.send(JSON.stringify(play));
-        if((gameManagement.nbError >= 0) && (gameManagement.nbError < 3)){
-          setHintShared(1)
-        }
-        else if((gameManagement.nbError >= 3) && (gameManagement.nbError < 6)){
-            setHintShared(2)
-        }
-        else {
-            setHintShared(3)
-        }
+        const play = {
+            index: index,
+            letter: letter,
+          };
+          client.send(JSON.stringify(play));
       };
-
-
 
     const clavier = [
         {letter : 'a', inWord : '?'},
@@ -147,41 +135,30 @@ export default function GameScreenGeoHangman({client}) {
       const pendu = [socle, poutreVerticale, poutreHorizontale, corde, tete, corps, brasDroit, brasGauche, jambeDroite, jambeGauche]
 
     return (
-        <div className="bg-gradient-to-r from-cyan-400 to-blue-600 h-full">
+        <div className="bg-gradient-to-r from-MEDIUM1 to-MEDIUM2 h-full">
           <div className="text-center">
             <h1 className="text-black bg-white rounded-b-xl ml-[30%] w-[40%] font-bold text-xl">Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
           </div>
+          {gameManagement.nbEssaisRestants == 0 && <EndGameScreen status={'perdu'} clavier={clavier} />}
             <div className="flex h-1/2">
                 <div className="w-1/2">
                     {pendu.slice(0, gameManagement.nbError).map(
                             (item) => <div style={item} ></div>
                     )}
                 </div>
-                <div className="w-1/2">
-                    <div className="h-2/3 pt-10">
-                        {gameManagement.hints.slice(0, hintShared).map(
-                            (item, i) => 
-                            <div className="flex border-4 mb-2 border-blue-200 w-2/3 rounded-lg">
-                              <div className="bg-blue-200 w-1/4 text-center">
-                                <h1 className=" text-blue-400 text-2xl font-bold pt-1">INDICE {i+1}</h1>
-                              </div>
-                              <div>
-                                <h1 className="text-white text-xl font-bold p-2">{item}</h1>
-                              </div>
-                            </div>
-                        )}
-                    </div>
-                    <div className=" text-center flex">
-                      {gameManagement.hiddenWord.map((i) => 
-                            <div className="bg-white w-16 h-16 rounded-xl text-center text-3xl font-bold ml-2">
-                                <h1>{i}</h1>
-                            </div>
-                        )}
+                <div>
+                    <Timer time={20}/>
                 </div>
+                <div className="w-1/2 flex mt-40 ml-20">
+                  {gameManagement.hiddenWord.map((i) => 
+                        <div className="bg-white w-16 h-16 rounded-xl text-center text-3xl font-bold pt-2 ml-2">
+                            <h1>{i}</h1>
+                        </div>
+                    )}
                 </div>
             </div>
             <div>
-            <div className="flex">
+              <div className="flex">
                 <div className="bg-red-200 w-80 text-center rounded-full ml-[40%]">
                   <h1 className="font-bold text-xl text-red-600">C'est au tour de Joueur !</h1>
                 </div>

@@ -11,6 +11,7 @@ import Home from '../components/home';
 import GameScreen from '../components/game';
 import GameScreenGeoHangman from '../components/gameGeoHangman';
 import GameScreenServer from '../components/gameServer';
+import GameScreenChrono from '../components/gameWithChrono';
 
 const client = new W3CWebSocket('ws://127.0.0.1:8001');
 //const client = new WebSocket('ws://127.0.0.1:8001')
@@ -34,6 +35,9 @@ export default function Controller() {
         break;
       case 3 :
         return 'playVersusServer'
+        break;
+      case 4 :
+        return 'playWithTime'
         break;
       case 5 :
         return 'playGeoHangman'
@@ -126,6 +130,7 @@ export default function Controller() {
         {gameManagement.step === 1 && <Home/>}
         {gameManagement.step === 2 && <GameScreen client={client}/>}
         {gameManagement.step === 3 && <GameScreenServer client={client}/>}
+        {gameManagement.step === 4 && <GameScreenChrono client={client}/>}
         {gameManagement.step === 5 && <GameScreenGeoHangman client={client}/>}
       </div>
     )

@@ -133,11 +133,13 @@ async def handler(websocket):
                     break
 
                 case 'playClassicMod':
-                    print(name + ' : DEBUT DE PARTIE')
+                    print(name + ' : PLAY CLASSIQUE')
+                    withTimer = False
+                    timer = 0
                     if (isInGroupe == True):
-                        await playClassicModCoop(websocket, name)
+                        await playClassicModCoop(websocket, name, withTimer, timer)
                     else:
-                        await playClassicModSolo(websocket, name)
+                        await playClassicModSolo(websocket, name, withTimer, timer)
                     break
 
                 case 'playVersusServer':
@@ -146,7 +148,14 @@ async def handler(websocket):
                     break
 
                 case 'playWithTime':
-                    print(name + ' : playWithTime')
+                    print(name + ' : PLAY WITH TIME')
+                    withTimer = True
+                    timer = 0
+                    if (isInGroupe == True):
+                        await playClassicModCoop(websocket, name, withTimer, timer)
+                    else:
+                        await playClassicModSolo(websocket, name, withTimer, timer)
+                    break
                     break
 
                 case 'playGeoHangman':
@@ -154,7 +163,7 @@ async def handler(websocket):
                     if (isInGroupe == True):
                         await playClassicModCoop(websocket)
                     else:
-                        await playGeoHangmanSolo(websocket)
+                        await playGeoHangmanSolo(websocket, name)
                     break
 
                 case 'joinGroupe':
@@ -215,7 +224,7 @@ async def handleGroupeJoining(name, websocket):
 # -------------------------------------------------------------------
 
 # Fonction de jeu classique en groupe (Attention : on ne cherche plus les joueur dans la liste des connectés mais du groupe)
-async def playClassicModSolo(websocket, name):
+async def playClassicModSolo(websocket, name, withTimer, timer):
     word = randomWord()
     print("LE MOT EST " + word)
     gameStringSolo = ""
@@ -223,8 +232,6 @@ async def playClassicModSolo(websocket, name):
     for i in range(len(word)):
         gameStringSolo += "-"
     updateGameString(name, gameStringSolo, False)
-    end = False
-    erreur = 0
     wordToSend = {
         "type": "word",
         "word": gameStringSolo,
@@ -438,11 +445,15 @@ async def pickGeoToGuess():
                 return line
 
 
-async def playGeoHangmanSolo(websocket):
+async def playGeoHangmanSolo(websocket, name):
     end = False
-    erreur = 0
+    gameStringSolo = ''
+    incorrectGuesses = 0
     geoLine = await pickGeoToGuess()
     geoLine = geoLine.split(';')
+    for i in range(len(geoLine[0].lower())):
+        gameStringSolo += "-"
+    updateGameString(name, gameStringSolo, False)
     hints = {
         "type": "hints",
         "first": geoLine[1],
@@ -450,14 +461,18 @@ async def playGeoHangmanSolo(websocket):
         "third": geoLine[3]
     }
     await websocket.send(json.dumps(hints))
+    wordToSend = {
+        "type": "word",
+        "word": gameStringSolo,
+    }
+    await websocket.send(json.dumps(wordToSend))
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            response = await manageLetter(message, erreur)
+            response = await manageLetter(message, name, geoLine[0].lower(), False, incorrectGuesses)
             print('Message de réponse bien construit')
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
-            print('erreur = ' + str(erreur))
             break
 
 

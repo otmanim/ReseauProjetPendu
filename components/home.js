@@ -3,11 +3,13 @@ import ButtonHome from "./button/buttonHome"
 import { motion } from "framer-motion"
 import { useAppContext } from '../pages/_app';
 import React, { useState } from 'react';
+import DifficultyButton from "./difficultyButton";
+import Timer from "./Timer";
 
 export default function Home() {
 
-    const {gameManagement, setGameManagement} = useAppContext(); 
-    
+    const {gameManagement, setGameManagement} = useAppContext();
+    const color = 'text-white bg-gradient-to-br from-'+gameManagement.difficulty+'1 to-'+gameManagement.difficulty+'2 w-[30%] rounded-2xl ml-[15%] mt-[3%]'
 
     return (
         <div>
@@ -32,19 +34,13 @@ export default function Home() {
                 </div>
             </div>
             <div className="flex">
-                <div className="text-white bg-application-secondary w-[30%] rounded-2xl ml-[15%] mt-[3%]">
-                    <h1 className="font-bold text-lg ml-[5%] pt-[5%]">SOLO AND MULTI MODE</h1>
-                    <h1 className="font-bold text-5xl ml-[5%]">SPECIAL T</h1>
-                    <h1 className="text-sm ml-[5%] w-[80%]">Play with a special dictionnary according to the choosen theme.</h1>
-                    <motion.button className="w-[80%] ml-[10%] bg-gray-700 rounded-full hover:bg-blue-500 h-16 mt-[7%]" whileHover={{ scale: 1.1 }}>
-                        LOGO DU THEME
-                    </motion.button>
-                    <motion.button className="w-[80%] ml-[10%] bg-gray-700 rounded-full hover:bg-red-500 h-16 mt-[3%]" whileHover={{ scale: 1.1 }}>
-                        LOGO DU THEME
-                    </motion.button>
-                    <motion.button className="w-[80%] ml-[10%] bg-gray-700 rounded-full hover:bg-green-500 h-16 mt-[3%] mb-[3%]" whileHover={{ scale: 1.1 }}>
-                        LOGO DU THEME
-                    </motion.button>
+                <div className={color}>
+                    <h1 className="font-bold text-lg ml-[5%] pt-[5%]">PARAMETERS</h1>
+                    <h1 className="font-bold text-5xl ml-[5%]">DIFFICULTY</h1>
+                    <h1 className="text-sm ml-[5%] w-[80%]">Choose in which difficulty you want to play. This one will have an impact on the number of lifes you'll have.</h1>
+                    <DifficultyButton difficulty={'EASY'} selected={gameManagement.difficulty}/>
+                    <DifficultyButton difficulty={'MEDIUM'} selected={gameManagement.difficulty}/>
+                    <DifficultyButton difficulty={'HARD'} selected={gameManagement.difficulty}/>
                 </div>
                 <div className="mt-[3%] ml-[2%] w-[45%]">
                     <h1 className="text-white font-bold text-5xl">SPECIAL MODS</h1>
@@ -75,6 +71,8 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
             </div>
         </div>
     )
