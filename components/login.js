@@ -14,7 +14,7 @@ export default function Login({client}){
       }
 
     return (
-        <div className='bg-application-secondary w-1/2 h-1/3 rounded-xl ml-[25%] mt-[15%]'>
+        <div className='w-1/2 h-1/3 rounded-xl ml-[25%] pt-[10%]'>
           <p className='text-application-secondary'>p</p>
           <div>
             <img src='logo.png' className='w-[30%] ml-[35%] mb-[5%]' />
