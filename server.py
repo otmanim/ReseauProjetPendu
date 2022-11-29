@@ -495,7 +495,7 @@ async def playGeoHangmanSolo(websocket, name):
         "word": gameStringSolo,
     }
     await websocket.send(json.dumps(wordToSend))
-    while end == False:
+    while incorrectGuesses < 8:
         async for message in websocket:
             print('Debut du tour')
             response = await manageLetter(message, name, geoLine[0].lower(), False, incorrectGuesses, 7)

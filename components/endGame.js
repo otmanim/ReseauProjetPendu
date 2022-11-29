@@ -12,6 +12,7 @@ export default function EndGameScreen({status, clavier}){
         gameManagement.nbEssaisRestants = 8
         gameManagement.step = 1
         gameManagement.timeOut = false
+        gameManagement.hints = []
         setGameManagement({...gameManagement})
       }
 
@@ -21,6 +22,7 @@ export default function EndGameScreen({status, clavier}){
         gameManagement.nbError = 0
         gameManagement.nbEssaisRestants = 8
         gameManagement.timeOut = false
+        gameManagement.hints = []
         setGameManagement({...gameManagement})
         const choice = {
             choice: 'leaderChoice',

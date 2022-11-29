@@ -1,6 +1,7 @@
 import { motion } from "framer-motion"
 import { useState } from "react";
 import { useAppContext } from '../pages/_app';
+import EndGameScreen from "./endGame";
 
 
 export default function GameScreenGeoHangman({client}) {
@@ -16,14 +17,17 @@ export default function GameScreenGeoHangman({client}) {
           letter: letter,
         };
         client.send(JSON.stringify(play));
-        if((gameManagement.nbError >= 0) && (gameManagement.nbError < 3)){
+        if((gameManagement.nbError >= 1) && (gameManagement.nbError < 3)){
           setHintShared(1)
         }
         else if((gameManagement.nbError >= 3) && (gameManagement.nbError < 6)){
             setHintShared(2)
         }
-        else {
+        else if (gameManagement.nbError >= 6){
             setHintShared(3)
+        }
+        else if (gameManagement.nbError == 0){
+            setHintShared(0)
         }
       };
 
@@ -152,6 +156,7 @@ export default function GameScreenGeoHangman({client}) {
           <div className="text-center">
             <h1 className="text-black bg-white rounded-b-xl ml-[30%] w-[40%] font-bold text-xl">Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
           </div>
+          {gameManagement.nbEssaisRestants == 0 && <EndGameScreen status={'perdu'} clavier={clavier} />}
             <div className="flex h-1/2">
                 <div className="w-1/2">
                     {pendu.slice(0, gameManagement.nbError).map(
@@ -160,17 +165,20 @@ export default function GameScreenGeoHangman({client}) {
                 </div>
                 <div className="w-1/2">
                     <div className="h-2/3 pt-10">
-                        {gameManagement.hints.slice(0, hintShared).map(
-                            (item, i) => 
-                            <div className="flex border-4 mb-2 border-blue-200 w-2/3 rounded-lg">
-                              <div className="bg-blue-200 w-1/4 text-center">
-                                <h1 className=" text-blue-400 text-2xl font-bold pt-1">INDICE {i+1}</h1>
-                              </div>
-                              <div>
-                                <h1 className="text-white text-xl font-bold p-2">{item}</h1>
-                              </div>
+                      {gameManagement.nbError>0 && 
+                        gameManagement.hints.slice(0, hintShared).map(
+                          (item, i) => 
+                          <div className="flex border-4 mb-2 border-blue-200 w-2/3 rounded-lg">
+                            <div className="bg-blue-200 w-1/4 text-center">
+                              <h1 className=" text-blue-400 text-2xl font-bold pt-1">INDICE {i+1}</h1>
                             </div>
-                        )}
+                            <div>
+                              <h1 className="text-white text-xl font-bold p-2">{item}</h1>
+                            </div>
+                          </div>
+                        )
+                      }
+                        
                     </div>
                     <div className=" text-center flex">
                       {gameManagement.hiddenWord.map((i) => 
