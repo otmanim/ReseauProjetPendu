@@ -9,6 +9,7 @@ export default function GameScreen({client}) {
 
     const handleClick = (event, letter, clavier, index) => {
         const play = {
+          type: "play",
             index: index,
             letter: letter,
           };

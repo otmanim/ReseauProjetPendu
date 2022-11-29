@@ -7,7 +7,23 @@ export default function DifficultyButton({difficulty, selected}){
 
     const changeDifficulty = (difficulty) => {
         gameManagement.difficulty = difficulty
+        switch(difficulty){
+            case 'EASY':
+                gameManagement.timer=60;
+                break
+            case 'MEDIUM':
+                gameManagement.timer=40;
+                break
+            case 'HARD':
+                gameManagement.timer=20;
+                break
+        }
         setGameManagement({...gameManagement})
+        const change = {
+            choice: "changeDifficulty",
+            difficulty: difficulty
+          };
+          gameManagement.websocket.send(JSON.stringify(change));
         console.log(gameManagement.difficulty)
       };
     

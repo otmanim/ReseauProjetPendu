@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../pages/_app';
 
-export default function Timer({time}){
+export default function Timer({time, client}){
   const [seconds, setSeconds] = useState(time);
   const [isActive, setIsActive] = useState(true);
+  const {gameManagement, setGameManagement} = useAppContext();
 
   function toggle() {
     setIsActive(!isActive);
@@ -15,11 +17,22 @@ export default function Timer({time}){
 
   useEffect(() => {
     let interval = null;
+    clearInterval(interval);
+    console.log("lessgo")
     if (isActive) {
-      if (seconds > 0){
+      if (seconds > 0 && gameManagement.timeOut == false){
         interval = setInterval(() => {
           setSeconds(seconds => seconds - 1);
         }, 1000);
+      }
+      else if (seconds == 0){  
+        const play = {
+          type: "endGame"
+        };
+        client.send(JSON.stringify(play));
+        gameManagement.timeOut = true
+        setGameManagement({...gameManagement})
+        setSeconds(time);
       }
     } else if (!isActive && seconds !== 0) {
       clearInterval(interval);

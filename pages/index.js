@@ -77,6 +77,7 @@ export default function Controller() {
         break;
       case "gameModeChoice":
         gameManagement.step = event.game
+        gameManagement.nbEssaisRestants = event.nbEssais
         console.log('On verifie le jeu selectionne, il s\'agit du ' + event.game)
         console.log('Pret pour jouer au mode classique !')
         const choice = {

@@ -30,6 +30,7 @@ async def handler(websocket):
     gameString = ""
     global incorrectGuesses
     incorrectGuesses = 0
+    nbEssais = 8
 
     # Nouvelle connection
     # On lui crée un Identifiant, puis l'ajoute à la liste des joueurs connectés et lui initialise un groupe vide
@@ -119,6 +120,7 @@ async def handler(websocket):
                     gameMode = {
                         "type": "gameModeChoice",
                         "game": choice["step"],
+                        "nbEssais": nbEssais,
                     }
                     if (isInGroupe):
                         print(
@@ -139,7 +141,7 @@ async def handler(websocket):
                     if (isInGroupe == True):
                         await playClassicModCoop(websocket, name, withTimer, timer)
                     else:
-                        await playClassicModSolo(websocket, name, withTimer, timer)
+                        await playClassicModSolo(websocket, name, nbEssais)
                     break
 
                 case 'playVersusServer':
@@ -168,6 +170,15 @@ async def handler(websocket):
 
                 case 'joinGroupe':
                     print(name + ' : Demande de groupe RECUE')
+                    break
+
+                case 'changeDifficulty':
+                    if choice['difficulty'] == 'EASY':
+                        nbEssais = 10
+                    elif choice['difficulty'] == 'MEDIUM':
+                        nbEssais = 8
+                    elif choice['difficulty'] == 'HARD':
+                        nbEssais = 5
                     break
 
                 case _:
@@ -224,11 +235,12 @@ async def handleGroupeJoining(name, websocket):
 # -------------------------------------------------------------------
 
 # Fonction de jeu classique en groupe (Attention : on ne cherche plus les joueur dans la liste des connectés mais du groupe)
-async def playClassicModSolo(websocket, name, withTimer, timer):
+async def playClassicModSolo(websocket, name, nbEssais):
     word = randomWord()
     print("LE MOT EST " + word)
     gameStringSolo = ""
     incorrectGuesses = 0
+    timeOut = False
     for i in range(len(word)):
         gameStringSolo += "-"
     updateGameString(name, gameStringSolo, False)
@@ -237,10 +249,14 @@ async def playClassicModSolo(websocket, name, withTimer, timer):
         "word": gameStringSolo,
     }
     await websocket.send(json.dumps(wordToSend))
-    while incorrectGuesses <= 7:
+    while incorrectGuesses < nbEssais and not timeOut:
         async for message in websocket:
             print('Debut du tour')
-            response = await manageLetter(message, name, word, False, incorrectGuesses)
+            response = await manageLetter(message, name, word, False, incorrectGuesses, nbEssais-1)
+            if response == "timeOut":
+                timeOut = True
+                print("fin du chrono")
+                break
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
             print('Message de réponse bien construit')
@@ -250,7 +266,7 @@ async def playClassicModSolo(websocket, name, withTimer, timer):
     print('Fin de partie')
 
 
-async def playClassicModCoop(websocket, name):
+async def playClassicModCoop(websocket, name, nbEssais):
     print(name)
     global groupWord
     if groupWord == "":
@@ -268,7 +284,7 @@ async def playClassicModCoop(websocket, name):
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            response = await manageLetter(message, erreur, groupWord, True, incorrectGuesses)
+            response = await manageLetter(message, erreur, groupWord, True, incorrectGuesses, nbEssais-1)
             print('Message de réponse bien construit')
             for member in groupe:
                 await member.get('websocket').send(json.dumps(response))
@@ -276,26 +292,32 @@ async def playClassicModCoop(websocket, name):
             break
 
 
-async def manageLetter(message, name, word, coop, incorrectGuesses):
+async def manageLetter(message, name, word, coop, incorrectGuesses, nbEssais):
     event = json.loads(message)
-    index = event["index"]
-    letter = event["letter"]
-    response = {
-        "type": "play",
-        "index": index,
-        "isInWord": isInWord(letter, name, word, coop),
-        "hiddenWord": getGameString(name, coop),
-        "nbEssaisRestants": 7-incorrectGuesses
-    }
+    response = None
+    if event["type"] == "play":
+        index = event["index"]
+        letter = event["letter"]
+        response = {
+            "type": "play",
+            "index": index,
+            "isInWord": isInWord(letter, name, word, coop),
+            "hiddenWord": getGameString(name, coop),
+            "nbEssaisRestants": nbEssais-incorrectGuesses
+        }
+    elif event["type"] == "endGame":
+        response = "timeOut"
     return response
 
 # -------------------------------------------------------------------
 # ----------------------JEU VERSUS SERVER----------------------------
 # -------------------------------------------------------------------
 
+
 async def playVersusServer(websocket):
     indexLettre = 0
-    clavierSelonFrenquence = ['e','a','i','s','n','r','t','o','l','u','d','c','m','p','g','b','v','h','f','q','y','x','j','k','w','z',]
+    clavierSelonFrenquence = ['e', 'a', 'i', 's', 'n', 'r', 't', 'o', 'l', 'u', 'd',
+                              'c', 'm', 'p', 'g', 'b', 'v', 'h', 'f', 'q', 'y', 'x', 'j', 'k', 'w', 'z', ]
     message = await websocket.recv()
     event = json.loads(message)
     mot = event["word"]
@@ -315,7 +337,7 @@ async def playVersusServer(websocket):
         listeMotASurveiller.append(line.strip().lower())
     existe = False
     while existe == False:
-        if mot.lower() in listeMotASurveiller: 
+        if mot.lower() in listeMotASurveiller:
             print('Votre mot est : ' + mot)
             existe = True
         else:
@@ -330,7 +352,7 @@ async def playVersusServer(websocket):
     tailleListe = len(listeMotASurveiller)
     for i in range(len(mot)):
         motCache += "-"
-    #Boucle principale
+    # Boucle principale
     while win == False:
         listeMotEnvoyer = []
         if len(listeMotASurveiller) > 1:
@@ -342,7 +364,7 @@ async def playVersusServer(websocket):
         if lettresRestantes == 0:
             win = True
             print('Vous avez gagné !')
-        if win == False :
+        if win == False:
             lettre = clavierSelonFrenquence[indexLettre]
             while not verifLettreUtile(listeMotASurveiller, lettre):
                 indexLettre += 1
@@ -354,37 +376,40 @@ async def playVersusServer(websocket):
                 erreur += 1
                 presentDansMot = 'n'
             lettresTrouvees = compteurLettresTrouvees(motCache)
-            listeMotASurveiller = miseAJourListeSurveiller(listeMotASurveiller, motCache, lettresTrouvees)
+            listeMotASurveiller = miseAJourListeSurveiller(
+                listeMotASurveiller, motCache, lettresTrouvees)
             indexLettre += 1
             print('Tentative avec : ' + lettre)
             print(motCache)
-            print('Erreurs : '+ str(erreur))
+            print('Erreurs : ' + str(erreur))
             if (len(listeMotASurveiller) > 6):
                 listeMot = listeMotASurveiller[0]
                 listeMotEnvoyer.append(listeMotASurveiller[0])
-                for i in range(1,6):
-                    listeMot += ', '+ listeMotASurveiller[i]
+                for i in range(1, 6):
+                    listeMot += ', ' + listeMotASurveiller[i]
                     listeMotEnvoyer.append(listeMotASurveiller[i])
-                listeMotEnvoyer.append('et '+ str(len(listeMotASurveiller) - 6) + ' autres mots.')
-                print('Mots correspondants : ' +listeMot+ ' et '+ str(len(listeMotASurveiller) - 6) + ' autres mots.' )
+                listeMotEnvoyer.append(
+                    'et ' + str(len(listeMotASurveiller) - 6) + ' autres mots.')
+                print('Mots correspondants : ' + listeMot + ' et ' +
+                      str(len(listeMotASurveiller) - 6) + ' autres mots.')
             else:
                 listeMot = listeMotASurveiller[0]
                 listeMotEnvoyer.append(listeMotASurveiller[0])
                 for i in range(1, len(listeMotASurveiller)):
-                    listeMot += ', '+ listeMotASurveiller[i]
+                    listeMot += ', ' + listeMotASurveiller[i]
                     listeMotEnvoyer.append(listeMotASurveiller[i])
-                print('Mots correspondants : ' +listeMot+ '.')
+                print('Mots correspondants : ' + listeMot + '.')
             response = {
                 "type": "playServer",
-               "letter": lettre,
+                "letter": lettre,
                 "isInWord": presentDansMot,
                 "hiddenWord": motCache,
                 "nbEssaisRestants": 7-erreur,
-                "motPossibles" : listeMotEnvoyer
+                "motPossibles": listeMotEnvoyer
             }
             await websocket.send(json.dumps(response))
             print('\n')
-    
+
 
 def verifLettreDansMot(lettre, mot, i):
     mot = list(mot)
@@ -392,6 +417,7 @@ def verifLettreDansMot(lettre, mot, i):
         return True
     else:
         return False
+
 
 def changerMotCache(lettre, motCache, mot):
     motCache = list(motCache)
@@ -402,6 +428,7 @@ def changerMotCache(lettre, motCache, mot):
     motCache = ''.join(motCache)
     return motCache
 
+
 def compteurLettresTrouvees(motCache):
     compteur = 0
     motCache = list(motCache)
@@ -409,6 +436,7 @@ def compteurLettresTrouvees(motCache):
         if motCache[i] == '-':
             compteur += 1
     return len(motCache) - compteur
+
 
 def miseAJourListeSurveiller(listeMotASurveiller, motCache, lettresTrouvees):
     nouvelleListe = []
@@ -423,7 +451,8 @@ def miseAJourListeSurveiller(listeMotASurveiller, motCache, lettresTrouvees):
             if compteur == lettresTrouvees:
                 nouvelleListe.append(dico)
                 break
-    return nouvelleListe       
+    return nouvelleListe
+
 
 def verifLettreUtile(listeMotASurveiller, lettre):
     for mot in listeMotASurveiller:
@@ -469,8 +498,10 @@ async def playGeoHangmanSolo(websocket, name):
     while end == False:
         async for message in websocket:
             print('Debut du tour')
-            response = await manageLetter(message, name, geoLine[0].lower(), False, incorrectGuesses)
+            response = await manageLetter(message, name, geoLine[0].lower(), False, incorrectGuesses, 7)
             print('Message de réponse bien construit')
+            if response['isInWord'] == 'n':
+                incorrectGuesses += 1
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
             break

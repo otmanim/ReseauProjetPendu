@@ -9,7 +9,7 @@ Mauritanie;Pays;Afrique;Nouakchott
 Bhoutan;Pays;Asie;Thimphu
 Egypte;Pays;Afrique;Cairo
 Espagne;Pays;Europe:Madrid
-Burundi;Pays;Afrique;
+Burundi;Pays;Afrique;Gitega
 Kiribati;Pays;Australie;Tarawa
 Namibie;Pays;Afrique;Windhoek
 Groenland;Pays;Amerique du nord; Nuuk

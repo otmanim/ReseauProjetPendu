@@ -10,6 +10,7 @@ export default function GameScreenChrono({client}) {
 
     const handleClick = (event, letter, clavier, index) => {
         const play = {
+            type: "play",
             index: index,
             letter: letter,
           };
@@ -140,6 +141,7 @@ export default function GameScreenChrono({client}) {
             <h1 className="text-black bg-white rounded-b-xl ml-[30%] w-[40%] font-bold text-xl">Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
           </div>
           {gameManagement.nbEssaisRestants == 0 && <EndGameScreen status={'perdu'} clavier={clavier} />}
+          {gameManagement.timeOut == true && <EndGameScreen status={'perdu'} clavier={clavier} />}
             <div className="flex h-1/2">
                 <div className="w-1/2">
                     {pendu.slice(0, gameManagement.nbError).map(
@@ -147,7 +149,7 @@ export default function GameScreenChrono({client}) {
                     )}
                 </div>
                 <div>
-                    <Timer time={20}/>
+                    <Timer time={gameManagement.timer} client={gameManagement.websocket}/>
                 </div>
                 <div className="w-1/2 flex mt-40 ml-20">
                   {gameManagement.hiddenWord.map((i) => 
