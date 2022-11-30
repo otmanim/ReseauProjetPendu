@@ -9,6 +9,7 @@ connected = []  # Liste de tous les joueurs connectés définis par leur nom, le
 # allGroupes = [] #Ensemble de tous les groupes créés défini par un leader et un groupe
 # On stockera le nom, websocket des membres du groupe, leur role (chef ou membre) ainsi que le mot à trouver
 groupe = []
+gameCoop = {'turn': "", 'idActif': 0}
 # Inventaire des parties en cours et de leur déroulement (seulement les parties en groupe)
 games = []
 inGroupe = None
@@ -247,6 +248,7 @@ async def playClassicModSolo(websocket, name, nbEssais):
     wordToSend = {
         "type": "word",
         "word": gameStringSolo,
+        "turn": name
     }
     await websocket.send(json.dumps(wordToSend))
     while incorrectGuesses < nbEssais and not timeOut:
@@ -287,9 +289,23 @@ async def playClassicModCoop(websocket, name, nbEssais):
         member['word'] = gameString
     end = False
     erreur = 0
+    if gameCoop['turn'] == "":
+        gameCoop['turn'] = groupe[1]['name']
+        gameCoop['idActif'] = 1
+    turn = gameCoop['turn']
     while incorrectGuesses < nbEssais and not timeOut:
+        print(name + " : turn = " + gameCoop['turn'])
+        print("name = " + name)
+        time.sleep(1)
+        if turn == name:
+            for member in groupe:
+                turnToSend = {
+                    "type": "turn",
+                    "turn": turn
+                }
+                await member.get('websocket').send(json.dumps(turnToSend))
         async for message in websocket:
-            print('Debut du tour')
+            print(name + " : Debut du tour")
             response = await manageLetter(message, erreur, groupWord, True, incorrectGuesses, nbEssais-1)
             if response == "timeOut":
                 timeOut = True
@@ -301,10 +317,22 @@ async def playClassicModCoop(websocket, name, nbEssais):
                     print("Le mot a été trouvé")
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
-            print('Message de réponse bien construit')
+            print(name + ' : Message de réponse bien construit')
+            if gameCoop['idActif'] < len(groupe)-1:
+                gameCoop['idActif'] += 1
+                print(name + ' : changement de tour effectué')
+            else:
+                gameCoop['idActif'] = 0
+                print(name + ' : changement de tour effectué dans le else')
+            gameCoop['turn'] = groupe[gameCoop['idActif']]['name']
             for member in groupe:
                 await member.get('websocket').send(json.dumps(response))
-            print('Message de réponse envoyé')
+                turnToSend = {
+                    "type": "turn",
+                    "turn": gameCoop['turn']
+                }
+                await member.get('websocket').send(json.dumps(turnToSend))
+            print(name + ' : Message de réponse envoyé')
             break
 
 

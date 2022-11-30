@@ -121,6 +121,11 @@ export default function Controller() {
         break;
       case "word":
         gameManagement.hiddenWord = event.word.split('')
+        gameManagement.turn = event.turn
+        break;
+      case "turn":
+        gameManagement.turn = event.turn
+        console.log(gameManagement.name + " : " + gameManagement.turn)
         break;
       default:
         throw new Error(`Unsupported event type: ${event.type}.`);

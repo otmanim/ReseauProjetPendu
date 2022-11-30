@@ -173,7 +173,7 @@ export default function GameScreen({client}) {
                 <div className="flex flex-wrap ml-10 mt-16">
                     {gameManagement.gameStatut[0].clavier.map((letter,i) => 
                         <div className="">
-                            {letter.inWord === '?' && <motion.button onClick={event => handleClick(event, letter.letter, gameManagement.gameStatut[0].clavier, i)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} className="bg-white text-5xl w-24 h-24 rounded-xl ml-2 mb-5"> {letter.letter} </motion.button>}
+                            {letter.inWord === '?' && gameManagement.turn === gameManagement.name && <motion.button onClick={event => handleClick(event, letter.letter, gameManagement.gameStatut[0].clavier, i)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} className="bg-white text-5xl w-24 h-24 rounded-xl ml-2 mb-5"> {letter.letter} </motion.button>}
                             {letter.inWord === 'y' && <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} disabled className="bg-green-200 text-green-600 text-5xl w-24 h-24 rounded-xl ml-2 mb-5"> {letter.letter} </motion.button>}
                             {letter.inWord === 'n' && <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} disabled className="bg-red-200 text-red-600 text-5xl w-24 h-24 rounded-xl ml-2 mb-5"> {letter.letter} </motion.button>}
                         </div>

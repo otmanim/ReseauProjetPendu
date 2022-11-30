@@ -27,6 +27,7 @@ function MyApp({ Component, pageProps }) {
     timer: 40,
     timeOut : false,
     potentialWords : [],
+    turn : ''
   })
 
   return (
