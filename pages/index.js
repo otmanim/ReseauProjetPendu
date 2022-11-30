@@ -51,11 +51,11 @@ export default function Controller() {
     switch (event.type) {
       case "connection":
         gameManagement.newNotif.push({id: event.id, type : 'New Connection', content : event.player + ' join the server'})
-        gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: ''})
+        gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: '', image: event.image})
         gameManagement.playerID = event.id
         break;
       case "getPlayers":
-        gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: event.inGroupOf})
+        gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: event.inGroupOf, image: event.image})
         break;
       case "groupeInvitation":
         gameManagement.newNotif.push({id: event.id, type : 'New Invitation', content : event.player + ' invite you in his groupe'})
@@ -65,7 +65,8 @@ export default function Controller() {
           if(player.name == event.player)
             player.inGroupOf = event.player
         })
-        console.log('CREATION DE GROUPE DE '+ event.name)
+        gameManagement.isLeader = 'true'
+        console.log('CREATION DE GROUPE DE '+ event.name + ' / IsLeader = true')
         break;
       case "newMember":
         gameManagement.playerList.map((player, index)=>{

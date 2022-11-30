@@ -22,7 +22,7 @@ const variants = {
 
 const colors = ["#FF008C", "#D309E1", "#9C1AFF", "#7700FF", "#4400FF"];
 
-export default function PlayerItem({ i, type, name, statut, myName, groupeLeader }){
+export default function PlayerItem({ i, type, name, statut, myName, image, groupeLeader }){
 
   const {gameManagement, setGameManagement} = useAppContext(); 
 
@@ -49,7 +49,7 @@ export default function PlayerItem({ i, type, name, statut, myName, groupeLeader
       <div>
       <div className="flex">
         <div>
-
+          <img src={image} width='60'/>
         </div>
         <div>
           <div className="flex">

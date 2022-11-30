@@ -11,6 +11,7 @@ export default function Login({client}){
     function login() {
         const nom = document.getElementById('msg').value
         client.send(document.getElementById('msg').value)
+        client.send(image)
         gameManagement.name = nom
         gameManagement.step = 1
         setGameManagement({...gameManagement})

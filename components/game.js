@@ -152,9 +152,26 @@ export default function GameScreen({client}) {
           {gameManagement.win == true && <EndGameScreen status={'gagne'} clavier={clavier} />}
             <div className="flex h-1/2">
                 <div className="w-1/2">
-                    {pendu.slice(0, gameManagement.nbError).map(
-                            (item) => <div style={item} ></div>
-                    )}
+                  {gameManagement.difficulty === 'EASY' && 
+                    pendu.slice(0, gameManagement.nbError).map(
+                      (item) => <div style={item} ></div>
+                    )
+                  }
+                  {gameManagement.difficulty === 'MEDIUM' && gameManagement.nbError <= 6 &&
+                    pendu.slice(0, gameManagement.nbError).map(
+                      (item) => <div style={item} ></div>
+                    )
+                  }
+                  {gameManagement.difficulty === 'MEDIUM' && gameManagement.nbError > 6 &&
+                    pendu.slice(0, gameManagement.nbError+2).map(
+                      (item) => <div style={item} ></div>
+                    )
+                  } 
+                  {gameManagement.difficulty === 'HARD' && 
+                    pendu.slice(0, gameManagement.nbError*2).map(
+                      (item) => <div style={item} ></div>
+                    )
+                  }  
                 </div>
                 <div className="w-1/2 flex mt-40 ml-40">
                   {gameManagement.hiddenWord.map((i) => 
@@ -167,7 +184,12 @@ export default function GameScreen({client}) {
             <div>
               <div className="flex">
                 <div className="bg-red-200 w-80 text-center rounded-full ml-[40%]">
-                  <h1 className="font-bold text-xl text-red-600">C'est au tour de Joueur !</h1>
+                  {gameManagement.turn === gameManagement.name && 
+                    <h1 className="font-bold text-xl text-green-600">C'est à votre tour !</h1>
+                  }
+                  {gameManagement.turn != gameManagement.name && 
+                    <h1 className="font-bold text-xl text-red-600">C'est au tour de {gameManagement.turn} !</h1>
+                  }
                 </div>
               </div>
                 <div className="flex flex-wrap ml-10 mt-16">

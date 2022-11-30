@@ -54,7 +54,9 @@ export default function Home() {
                                 <h1 className="font-bold">SOLO AND MULTI MODE</h1>
                                 <h1 className="font-bold text-3xl">BEAT THE TIME</h1>
                                 <h1 className="w-[90%]">Try to gess the word before the end of the time</h1>
-                                <ButtonHome title={'PLAY'} balise={'playWithTime'} step={4}/>
+                                {gameManagement.isLeader != 'false' &&
+                                    <ButtonHome title={'PLAY'} balise={'playWithTime'} step={4}/>
+                                }
                             </div>
                         </div>
                         <div className="bg-application-secondary ml-[5%] rounded-xl mt-[5%] w-[45%]">

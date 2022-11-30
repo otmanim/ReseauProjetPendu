@@ -21,7 +21,7 @@ export default function Navigation({playerListe}){
   return (
     <motion.ul variants={variants} className='pl-[25px] pt-[100px] absolute top-100 width-[230px]' >
     {playerListe.map(i => (
-      <PlayerItem i={i} type='available' name={i.name} statut={i.statut} myName={gameManagement.name} groupeLeader={i.inGroupOf} key={i} />
+      <PlayerItem i={i} type='available' name={i.name} statut={i.statut} myName={gameManagement.name} groupeLeader={i.inGroupOf} image={i.image} key={i} />
     ))}
   </motion.ul>
   )

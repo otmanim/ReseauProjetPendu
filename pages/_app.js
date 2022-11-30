@@ -8,7 +8,7 @@ function MyApp({ Component, pageProps }) {
   const [gameManagement, setGameManagement] = useState({
     name: '',
     websocket: null,
-    playerList: [{name : 'admin', statut : 'available', inGroupOf: ''}],
+    playerList: [{name : 'admin', statut : 'available', inGroupOf: '', image : '/avatars/avatar1.png'}],
     isLeader: '',
     groupeLeader : '',
     newNotif : [],
