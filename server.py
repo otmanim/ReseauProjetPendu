@@ -490,7 +490,7 @@ def verifLettreUtile(listeMotASurveiller, lettre):
 
 async def pickGeoToGuess():
     # En premier, nous devons selectionner une zone geographique a faire deviner
-    lineToPick = random.randint(0, 49)
+    lineToPick = random.randint(0, 21)
     with open(r"./data/geohangman.txt", 'r') as fp:
         for i, line in enumerate(fp):
             # read line 4 and 7
