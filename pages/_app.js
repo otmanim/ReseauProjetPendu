@@ -22,6 +22,7 @@ function MyApp({ Component, pageProps }) {
     hiddenWord : [],
     nbError : 0,
     nbEssaisRestants : 0,
+    win : false,
     hints : [],
     timer: 40,
     timeOut : false,

@@ -94,6 +94,15 @@ export default function Controller() {
         }
         gameManagement.hiddenWord = event.hiddenWord.split('')
         break;
+      case "wordSuggested":
+        if (event.isInWord == 'n'){
+          gameManagement.nbError += 1
+          gameManagement.nbEssaisRestants = gameManagement.nbEssaisRestants - 1
+        }
+        else {
+          gameManagement.win = true
+        }
+        break;
       case "playServer":
         gameManagement.potentialWords = event.motPossibles
         gameManagement.hiddenWord = event.hiddenWord.split('')

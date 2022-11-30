@@ -139,7 +139,7 @@ async def handler(websocket):
                     withTimer = False
                     timer = 0
                     if (isInGroupe == True):
-                        await playClassicModCoop(websocket, name, withTimer, timer)
+                        await playClassicModCoop(websocket, name, nbEssais)
                     else:
                         await playClassicModSolo(websocket, name, nbEssais)
                     break
@@ -257,6 +257,10 @@ async def playClassicModSolo(websocket, name, nbEssais):
                 timeOut = True
                 print("fin du chrono")
                 break
+            if response['type'] == "wordSuggested":
+                if response['isInWord'] == 'y':
+                    timeOut = True
+                    print("Le mot a été trouvé")
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
             print('Message de réponse bien construit')
@@ -269,6 +273,8 @@ async def playClassicModSolo(websocket, name, nbEssais):
 async def playClassicModCoop(websocket, name, nbEssais):
     print(name)
     global groupWord
+    incorrectGuesses = 0
+    timeOut = False
     if groupWord == "":
         groupWord = randomWord()
     print("LE MOT EST " + groupWord)
@@ -281,10 +287,20 @@ async def playClassicModCoop(websocket, name, nbEssais):
         member['word'] = gameString
     end = False
     erreur = 0
-    while end == False:
+    while incorrectGuesses < nbEssais and not timeOut:
         async for message in websocket:
             print('Debut du tour')
             response = await manageLetter(message, erreur, groupWord, True, incorrectGuesses, nbEssais-1)
+            if response == "timeOut":
+                timeOut = True
+                print("fin du chrono")
+                break
+            if response['type'] == "wordSuggested":
+                if response['isInWord'] == 'y':
+                    timeOut = True
+                    print("Le mot a été trouvé")
+            if response['isInWord'] == 'n':
+                incorrectGuesses += 1
             print('Message de réponse bien construit')
             for member in groupe:
                 await member.get('websocket').send(json.dumps(response))
@@ -295,6 +311,7 @@ async def playClassicModCoop(websocket, name, nbEssais):
 async def manageLetter(message, name, word, coop, incorrectGuesses, nbEssais):
     event = json.loads(message)
     response = None
+    rep = 'n'
     if event["type"] == "play":
         index = event["index"]
         letter = event["letter"]
@@ -307,6 +324,13 @@ async def manageLetter(message, name, word, coop, incorrectGuesses, nbEssais):
         }
     elif event["type"] == "endGame":
         response = "timeOut"
+    elif event["type"] == "play-word":
+        if word == event["word"]:
+            rep = 'y'
+        response = {
+            "type": "wordSuggested",
+            "isInWord": rep,
+        }
     return response
 
 # -------------------------------------------------------------------
