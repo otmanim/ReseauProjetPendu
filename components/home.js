@@ -32,7 +32,7 @@ export default function Home() {
                                         <ButtonHome title={'VERSUS'} balise={'playClassicMod'} step={2}/>
                                     </div>
                         }
-                        {(gameManagement.groupeLeader != gameManagement.name) &&
+                        {(gameManagement.groupeLeader != gameManagement.name) && gameManagement.groupeLeader != '' &&
                             <h1 className="font-bold text-xl mt-6">Waiting Leader Choice...</h1>
                         }
                     </div>
@@ -47,7 +47,7 @@ export default function Home() {
                     {(gameManagement.groupeLeader == gameManagement.name) &&
                         <h1 className="font-bold text-xl mt-6 ml-[10%]">Only Available in solo</h1>
                     }
-                    {(gameManagement.groupeLeader != gameManagement.name) &&
+                    {(gameManagement.groupeLeader != gameManagement.name) && gameManagement.groupeLeader != '' &&
                         <h1 className="font-bold text-xl mt-6 ml-[10%]">Waiting Leader Choice...</h1>
                     }
                 </div>
@@ -79,7 +79,7 @@ export default function Home() {
                                 {(gameManagement.groupeLeader == gameManagement.name) &&
                                     <h1 className="font-bold text-xl mt-6">Only Available in solo</h1>
                                 }
-                                {(gameManagement.groupeLeader != gameManagement.name) &&
+                                {(gameManagement.groupeLeader != gameManagement.name) && gameManagement.groupeLeader != '' &&
                                     <h1 className="font-bold text-xl mt-6">Waiting Leader Choice...</h1>
                                 }
                             </div>
@@ -98,7 +98,7 @@ export default function Home() {
                                 {(gameManagement.groupeLeader == gameManagement.name) &&
                                     <h1 className="font-bold text-xl mt-6">Only Available in solo</h1>
                                 }
-                                {(gameManagement.groupeLeader != gameManagement.name) &&
+                                {(gameManagement.groupeLeader != gameManagement.name) && gameManagement.groupeLeader != '' &&
                                     <h1 className="font-bold text-xl mt-6">Waiting Leader Choice...</h1>
                                 }
                                 <p className="text-application-secondary">Ecart</p>

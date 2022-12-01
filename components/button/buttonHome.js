@@ -10,11 +10,22 @@ export default function ButtonHome({title, balise, step}) {
     function play() {
         gameManagement.playerStatut = 'ingame'
         setGameManagement({...gameManagement})
-        const choice = {
-            choice: 'leaderChoice',
-            step: step,
-        };
-        gameManagement.websocket.send(JSON.stringify(choice))
+        if (title == 'VERSUS'){
+            const choice = {
+                choice: 'leaderChoice',
+                step: step,
+                versus : true
+            };
+            gameManagement.websocket.send(JSON.stringify(choice))
+        }
+        else {
+            const choice = {
+                choice: 'leaderChoice',
+                step: step,
+                versus : false
+            };
+            gameManagement.websocket.send(JSON.stringify(choice))
+        }
       }
 
     return (

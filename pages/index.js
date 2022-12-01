@@ -83,8 +83,10 @@ export default function Controller() {
         gameManagement.nbEssaisRestants = event.nbEssais
         console.log('On verifie le jeu selectionne, il s\'agit du ' + event.game)
         console.log('Pret pour jouer au mode classique !')
+        console.log('index ici versus = '+ event.versus)
         const choice = {
-          choice: selectGameMod(event.game)
+          choice: selectGameMod(event.game),
+          versus : event.versus
         };
         gameManagement.websocket.send(JSON.stringify(choice))
         console.log('Procédure terminée!')
@@ -98,13 +100,11 @@ export default function Controller() {
         gameManagement.hiddenWord = event.hiddenWord.split('')
         break;
       case "wordSuggested":
-        console.log("ici ca test le isinword" + event.isInWord)
         if (event.isInWord == 'n'){
           gameManagement.nbError += 1
           gameManagement.nbEssaisRestants = gameManagement.nbEssaisRestants - 1
         }
         else {
-          console.log("c'est winnnn")
           gameManagement.win = true
         }
         break;
@@ -127,6 +127,9 @@ export default function Controller() {
       case "word":
         gameManagement.hiddenWord = event.word.split('')
         gameManagement.turn = event.turn
+        break;
+      case "lose":
+        gameManagement.nbEssaisRestants = 0
         break;
       case "turn":
         gameManagement.turn = event.turn

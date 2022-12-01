@@ -33,6 +33,7 @@ async def handler(websocket):
     global incorrectGuesses
     incorrectGuesses = 0
     nbEssais = 8
+    versus = False
 
     # Nouvelle connection
     # On lui crée un Identifiant, puis l'ajoute à la liste des joueurs connectés et lui initialise un groupe vide
@@ -126,7 +127,10 @@ async def handler(websocket):
                         "type": "gameModeChoice",
                         "game": choice["step"],
                         "nbEssais": nbEssais,
+                        "versus": choice["versus"]
                     }
+                    print("server la valeur de versus est : " +
+                          str(choice["versus"]))
                     if (isInGroupe):
                         print(
                             name + ' : Si dans un groupe alors envoyer à tout le monde')
@@ -144,10 +148,15 @@ async def handler(websocket):
                     withTimer = False
                     timer = 0
                     if (isInGroupe == True):
-                        await playClassicModCoop(websocket, name, nbEssais)
+                        print("server case playClassicMod = " +
+                              str(choice["versus"]))
+                        if choice["versus"] == False:
+                            await playClassicModCoop(websocket, name, nbEssais)
+                        else:
+                            await playClassicModSolo(websocket, name, nbEssais, True)
                     else:
                         await resetGame()
-                        await playClassicModSolo(websocket, name, nbEssais)
+                        await playClassicModSolo(websocket, name, nbEssais, False)
                     break
 
                 case 'playVersusServer':
@@ -159,7 +168,7 @@ async def handler(websocket):
                     print(name + ' : PLAY WITH TIME')
                     withTimer = True
                     timer = 0
-                    await playClassicModSolo(websocket, name, nbEssais)
+                    await playClassicModSolo(websocket, name, nbEssais, False)
                     break
 
                 case 'playGeoHangman':
@@ -253,8 +262,15 @@ async def handleGroupeJoining(name, websocket):
 # -------------------------------------------------------------------
 
 # Fonction de jeu classique en groupe (Attention : on ne cherche plus les joueur dans la liste des connectés mais du groupe)
-async def playClassicModSolo(websocket, name, nbEssais):
-    word = randomWord()
+async def playClassicModSolo(websocket, name, nbEssais, versus):
+    word = ""
+    if versus:
+        global groupWord
+        if groupWord == "":
+            groupWord = randomWord()
+        word = groupWord
+    else:
+        word = randomWord()
     print("LE MOT EST " + word)
     gameStringSolo = ""
     incorrectGuesses = 0
@@ -280,9 +296,19 @@ async def playClassicModSolo(websocket, name, nbEssais):
                 if response['isInWord'] == 'y':
                     timeOut = True
                     print("Le mot a été trouvé")
+                    if versus:
+                        for member in groupe:
+                            if member['name'] != name:
+                                lose = {
+                                    "type": "lose",
+                                    "isInWord": "y"
+                                }
+                                await member["websocket"].send(json.dumps(lose))
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
             print('Message de réponse bien construit')
+            print("le type de la reponse : " + response['type'])
+            print("isinwordddddd : " + response['isInWord'])
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
             break
