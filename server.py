@@ -346,6 +346,8 @@ async def playClassicModCoop(websocket, name, nbEssais):
                 await member.get('websocket').send(json.dumps(turnToSend))
         print(name + " : Ca attend le feu vert EN BALLE")
         async for message in websocket:
+            if gameCoop['isWin'] == True:
+                break
             print(name + " : Debut du tour")
             response = await manageLetter(message, erreur, groupWord, True, gameCoop['nbErreur'], gameCoop['nbEssais']-1)
             if response['type'] == "wordSuggested":
