@@ -13,7 +13,7 @@ import GameScreenGeoHangman from '../components/gameGeoHangman';
 import GameScreenServer from '../components/gameServer';
 import GameScreenChrono from '../components/gameWithChrono';
 
-const client = new W3CWebSocket('ws://127.0.0.1:8001');
+const client = new W3CWebSocket('ws://172.20.10.4:8001');
 //const client = new WebSocket('ws://127.0.0.1:8001')
 
 
