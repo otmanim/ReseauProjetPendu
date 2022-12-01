@@ -43,7 +43,7 @@ export default function EndGameScreen({status, clavier}){
             }
             {status == 'gagne' && 
                 <div className="text-center text-5xl font-bold mt-5">
-                    <h1 className="text-white">Felicitation, vous avez</h1>
+                    <h1 className="text-white">Felicitations, vous avez</h1>
                     <h1 className="text-green-400 mt-2">GAGNE...</h1>
                 </div>
             }

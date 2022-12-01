@@ -23,6 +23,7 @@ export default function GameScreen({client}) {
             word: document.getElementById('wordSuggested').value,
           };
           client.send(JSON.stringify(play));
+          document.getElementById('wordSuggested').value = ""
       };
 
     const clavier = [

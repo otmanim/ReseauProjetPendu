@@ -9,7 +9,8 @@ connected = []  # Liste de tous les joueurs connectés définis par leur nom, le
 # allGroupes = [] #Ensemble de tous les groupes créés défini par un leader et un groupe
 # On stockera le nom, websocket des membres du groupe, leur role (chef ou membre) ainsi que le mot à trouver
 groupe = []
-gameCoop = {'turn': "", 'idActif': 0, 'nbErreur': 0, 'isWin': False, 'nbEssais' : 8}
+gameCoop = {'turn': "", 'idActif': 0,
+            'nbErreur': 0, 'isWin': False, 'nbEssais': 8}
 # Inventaire des parties en cours et de leur déroulement (seulement les parties en groupe)
 games = []
 inGroupe = None
@@ -158,10 +159,7 @@ async def handler(websocket):
                     print(name + ' : PLAY WITH TIME')
                     withTimer = True
                     timer = 0
-                    if (isInGroupe == True):
-                        await playClassicModCoop(websocket, name, withTimer, timer)
-                    else:
-                        await playClassicModSolo(websocket, name, withTimer, timer)
+                    await playClassicModSolo(websocket, name, nbEssais)
                     break
 
                 case 'playGeoHangman':
@@ -204,11 +202,13 @@ async def handler(websocket):
 # Fonction à appeler lorsqu'un joueur tente d'inviter un autre joueur à son groupe.
 # On commence par vérifier si ce joueur existe puis on lui envoie une invitation
 
+
 async def resetGame():
     gameCoop['turn'] = ''
     gameCoop['idActif'] = 0
     gameCoop['nbErreur'] = 0
     gameCoop['isWin'] = False
+
 
 async def inviteOtherPlayer(name, nameOtherPlayer):
     for connection in connected:
@@ -558,10 +558,14 @@ async def playGeoHangmanSolo(websocket, name):
         "word": gameStringSolo,
     }
     await websocket.send(json.dumps(wordToSend))
-    while incorrectGuesses < 8:
+    while incorrectGuesses < 8 and not end:
         async for message in websocket:
             print('Debut du tour')
             response = await manageLetter(message, name, geoLine[0].lower(), False, incorrectGuesses, 7)
+            if response['type'] == "wordSuggested":
+                if response['isInWord'] == 'y':
+                    end = True
+                    print("Le mot a été trouvé")
             print('Message de réponse bien construit')
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1

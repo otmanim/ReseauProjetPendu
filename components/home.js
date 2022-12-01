@@ -51,7 +51,7 @@ export default function Home() {
                                 <img className="w-36 ml-14 mt-3 mb-2" src="chrono.png" />
                             </div>
                             <div className="text-white ml-[10%]">
-                                <h1 className="font-bold">SOLO AND MULTI MODE</h1>
+                                <h1 className="font-bold">SOLO MODE</h1>
                                 <h1 className="font-bold text-3xl">BEAT THE TIME</h1>
                                 <h1 className="w-[90%]">Try to gess the word before the end of the time</h1>
                                 {gameManagement.isLeader != 'false' &&
@@ -64,7 +64,7 @@ export default function Home() {
                                 <img className="w-48 ml-12 mt-3 mb-2" src="earth.png" />
                             </div>
                             <div className="text-white ml-[10%]">
-                                <h1 className="font-bold">SOLO AND MULTI MODE</h1>
+                                <h1 className="font-bold">SOLO MODE</h1>
                                 <h1 className="font-bold text-3xl">GEOHANGMAN</h1>
                                 <h1 className="w-[90%]">Try to guess the hidden country with the help of hints. </h1>
                                 <ButtonHome title={'PLAY'} balise={'playGeoHangman'} step={5}/>

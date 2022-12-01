@@ -96,11 +96,13 @@ export default function Controller() {
         gameManagement.hiddenWord = event.hiddenWord.split('')
         break;
       case "wordSuggested":
+        console.log("ici ca test le isinword" + event.isInWord)
         if (event.isInWord == 'n'){
           gameManagement.nbError += 1
           gameManagement.nbEssaisRestants = gameManagement.nbEssaisRestants - 1
         }
         else {
+          console.log("c'est winnnn")
           gameManagement.win = true
         }
         break;
@@ -132,6 +134,7 @@ export default function Controller() {
         throw new Error(`Unsupported event type: ${event.type}.`);
     }
     setGameManagement({...gameManagement})
+    console.log("game = " + gameManagement.win)
   };
   
   
