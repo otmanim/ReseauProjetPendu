@@ -66,12 +66,14 @@ export default function Controller() {
             player.inGroupOf = event.player
         })
         gameManagement.isLeader = 'true'
+        gameManagement.groupeLeader = event.player
         console.log('CREATION DE GROUPE DE '+ event.name + ' / IsLeader = true')
         break;
       case "newMember":
         gameManagement.playerList.map((player, index)=>{
           if(player.name == event.name)
             player.inGroupOf = event.leader
+            gameManagement.groupeLeader = event.leader
         })
         gameManagement.isLeader = 'false'
         console.log(gameManagement.playerList)

@@ -23,14 +23,33 @@ export default function Home() {
                         <h1 className="font-bold text-lg">SOLO AND MULTI MODE</h1>
                         <h1 className="font-bold text-5xl">THE CLASSIC</h1>
                         <h1 className="text-sm">Server pick a word and you try to guess it, the classic hangman game.</h1>
-                        <ButtonHome title={'PLAY'} balise={'playClassicMod'} step={2}/>
+                        {(gameManagement.groupeLeader == '') &&
+                                    <ButtonHome title={'PLAY'} balise={'playClassicMod'} step={2}/>
+                        }
+                        {(gameManagement.groupeLeader == gameManagement.name) &&
+                                    <div className="flex">
+                                        <ButtonHome title={'COOP'} balise={'playClassicMod'} step={2}/>
+                                        <ButtonHome title={'VERSUS'} balise={'playClassicMod'} step={2}/>
+                                    </div>
+                        }
+                        {(gameManagement.groupeLeader != gameManagement.name) &&
+                            <h1 className="font-bold text-xl mt-6">Waiting Leader Choice...</h1>
+                        }
                     </div>
                 </div>
                 <div className="bg-application-secondary w-[22%] ml-[2%] rounded-2xl text-white">
                     <h1 className="font-bold text-lg ml-[10%] mt-[10%]">SOLO MODE</h1>
                     <h1 className="font-bold text-4xl ml-[10%]">CHALLENGE THE SERVER</h1>
                     <h1 className="text-sm ml-[10%] w-[80%]">Special mode where the server try to guess your own word.</h1>
+                    {(gameManagement.groupeLeader == '') &&
                     <ButtonHome title={'PLAY'} balise={'playVersusServer'} step={3}/>
+                    }
+                    {(gameManagement.groupeLeader == gameManagement.name) &&
+                        <h1 className="font-bold text-xl mt-6 ml-[10%]">Only Available in solo</h1>
+                    }
+                    {(gameManagement.groupeLeader != gameManagement.name) &&
+                        <h1 className="font-bold text-xl mt-6 ml-[10%]">Waiting Leader Choice...</h1>
+                    }
                 </div>
             </div>
             <div className="flex">
@@ -54,8 +73,14 @@ export default function Home() {
                                 <h1 className="font-bold">SOLO MODE</h1>
                                 <h1 className="font-bold text-3xl">BEAT THE TIME</h1>
                                 <h1 className="w-[90%]">Try to gess the word before the end of the time</h1>
-                                {gameManagement.isLeader != 'false' &&
+                                {(gameManagement.groupeLeader == '') &&
                                     <ButtonHome title={'PLAY'} balise={'playWithTime'} step={4}/>
+                                }
+                                {(gameManagement.groupeLeader == gameManagement.name) &&
+                                    <h1 className="font-bold text-xl mt-6">Only Available in solo</h1>
+                                }
+                                {(gameManagement.groupeLeader != gameManagement.name) &&
+                                    <h1 className="font-bold text-xl mt-6">Waiting Leader Choice...</h1>
                                 }
                             </div>
                         </div>
@@ -67,7 +92,15 @@ export default function Home() {
                                 <h1 className="font-bold">SOLO MODE</h1>
                                 <h1 className="font-bold text-3xl">GEOHANGMAN</h1>
                                 <h1 className="w-[90%]">Try to guess the hidden country with the help of hints. </h1>
-                                <ButtonHome title={'PLAY'} balise={'playGeoHangman'} step={5}/>
+                                {(gameManagement.groupeLeader == '') &&
+                                    <ButtonHome title={'PLAY'} balise={'playGeoHangman'} step={5}/>
+                                }
+                                {(gameManagement.groupeLeader == gameManagement.name) &&
+                                    <h1 className="font-bold text-xl mt-6">Only Available in solo</h1>
+                                }
+                                {(gameManagement.groupeLeader != gameManagement.name) &&
+                                    <h1 className="font-bold text-xl mt-6">Waiting Leader Choice...</h1>
+                                }
                                 <p className="text-application-secondary">Ecart</p>
                             </div>
                         </div>
