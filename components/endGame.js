@@ -50,6 +50,12 @@ export default function EndGameScreen({status, clavier}){
                     <h1 className="text-green-400 mt-2">GAGNE...</h1>
                 </div>
             }
+            {status == 'server' && 
+                <div className="text-center text-5xl font-bold mt-5">
+                    <h1 className="text-white">Le serveur a deviné votre</h1>
+                    <h1 className="text-green-400 mt-2">MOT !</h1>
+                </div>
+            }
             {(gameManagement.groupeLeader == gameManagement.name || gameManagement.groupeLeader == '') &&
              <div>
                 <div className="text-center mt-5">

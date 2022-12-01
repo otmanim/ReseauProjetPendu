@@ -13,7 +13,7 @@ import GameScreenGeoHangman from '../components/gameGeoHangman';
 import GameScreenServer from '../components/gameServer';
 import GameScreenChrono from '../components/gameWithChrono';
 
-const client = new W3CWebSocket('ws://172.20.10.4:8001');
+const client = new W3CWebSocket('ws://192.168.1.33:8001');
 //const client = new WebSocket('ws://127.0.0.1:8001')
 
 
@@ -139,13 +139,26 @@ export default function Controller() {
         gameManagement.turn = event.turn
         break;
       case "end":
+        console.log('BIG WIN = ' + event.win)
         if (!event.win){
           gameManagement.nbEssaisRestants = 0 
+        }
+        else {
+          gameManagement.win = true
         }
         const end = {
           type: 'endGame',
         };
         gameManagement.websocket.send(JSON.stringify(end))
+        break;
+      case "endServer":
+        console.log('BIG WIN = ' + event.win)
+        if (!event.win){
+          gameManagement.nbEssaisRestants = 0 
+        }
+        else {
+          gameManagement.win = true
+        }
         break;
       case "turn":
         gameManagement.turn = event.turn

@@ -9,6 +9,8 @@ export default function GameScreenGeoHangman({client}) {
     const {gameManagement, setGameManagement} = useAppContext();
     const [hintShared, setHintShared] = useState(0);
     const [type3eIndice, setType3eIndice] = useState('');
+    const [errorText, setErrorText] = useState(false)
+    var format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~éèçà]/;
 
     const handleClick = (event, letter, clavier, index) => {
       const play = {
@@ -32,13 +34,19 @@ export default function GameScreenGeoHangman({client}) {
       };
 
       const suggestWord = (event) => {
-        const play = {
+        if(!format.test(document.getElementById('wordSuggested').value)){
+          setErrorText(false)
+          const play = {
             type: "play-word",
-            word: document.getElementById('wordSuggested').value,
+            word: document.getElementById('wordSuggested').value.toLowerCase(),
           };
           client.send(JSON.stringify(play));
           document.getElementById('wordSuggested').value = ""
-      };
+        }
+        else {
+          setErrorText(true)
+        }
+        };
 
 
 
@@ -202,7 +210,6 @@ export default function GameScreenGeoHangman({client}) {
             <div>
             <div className="flex">
                 <div className="bg-red-200 w-80 text-center rounded-full ml-[40%]">
-                  <h1 className="font-bold text-xl text-red-600">C'est au tour de Joueur !</h1>
                 </div>
               </div>
                 <div className="flex flex-wrap ml-10 mt-16">
@@ -218,6 +225,9 @@ export default function GameScreenGeoHangman({client}) {
                   <input id="wordSuggested" className="w-80 h-10 text-3xl text-center rounded-tl-full rounded-bl-full" type={'text'}/>
                   <button onClick={event => suggestWord(event)} className="bg-black text-white w-24 h-10 rounded-tr-full rounded-br-full text-xl font-bold">Send</button>
                 </div>
+                { errorText && 
+                    <h1 className="text-red-500 text-2xl text-center">Le mot ne doit contenir ni caractères spéciaux, ni accents !</h1>
+                  }
             </div>
         </div>
     )

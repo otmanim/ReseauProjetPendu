@@ -7,6 +7,8 @@ import EndGameScreen from "./endGame";
 export default function GameScreen({client}) {
 //ATTENTION MON POTE FAIT GAFFE : SI LE CLAVIER EST PAS RESET AVANT CHAQUE DEBUT DE PARTIE
     const {gameManagement, setGameManagement} = useAppContext();
+    const [errorText, setErrorText] = useState(false)
+    var format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~éèçà]/;
 
     const handleClick = (event, letter, clavier, index) => {
         const play = {
@@ -18,12 +20,18 @@ export default function GameScreen({client}) {
       };
 
     const suggestWord = (event) => {
+      if(!format.test(document.getElementById('wordSuggested').value)){
+        setErrorText(false)
         const play = {
-            type: "play-word",
-            word: document.getElementById('wordSuggested').value,
-          };
-          client.send(JSON.stringify(play));
-          document.getElementById('wordSuggested').value = ""
+          type: "play-word",
+          word: document.getElementById('wordSuggested').value.toLowerCase(),
+        };
+        client.send(JSON.stringify(play));
+        document.getElementById('wordSuggested').value = ""
+      }
+      else {
+        setErrorText(true)
+      }
       };
 
     const clavier = [
@@ -147,7 +155,7 @@ export default function GameScreen({client}) {
     return (
         <div className="bg-gradient-to-r from-button-home-1 to-button-home-2 h-full">
           <div className="text-center">
-            <h1 className="text-black bg-white rounded-b-xl ml-[30%] w-[40%] font-bold text-xl">Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
+              <h1 className="text-black bg-white rounded-b-xl ml-[30%] w-[40%] font-bold text-xl">Nombre d'essais restants : {gameManagement.nbEssaisRestants}</h1>
           </div>
           {gameManagement.nbEssaisRestants == 0 && <EndGameScreen status={'perdu'} clavier={clavier} />}
           {gameManagement.win == true && <EndGameScreen status={'gagne'} clavier={clavier} />}
@@ -193,7 +201,7 @@ export default function GameScreen({client}) {
                   }
                 </div>
               </div>
-                <div className="flex flex-wrap ml-10 mt-16">
+                <div className="flex flex-wrap ml-10 mt-5">
                     {gameManagement.gameStatut[0].clavier.map((letter,i) => 
                         <div className="">
                             {letter.inWord === '?' && gameManagement.turn === gameManagement.name && <motion.button onClick={event => handleClick(event, letter.letter, gameManagement.gameStatut[0].clavier, i)} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} className="bg-white text-5xl w-24 h-24 rounded-xl ml-2 mb-5"> {letter.letter} </motion.button>}
@@ -206,6 +214,9 @@ export default function GameScreen({client}) {
                   <input id="wordSuggested" className="w-80 h-10 text-3xl text-center rounded-tl-full rounded-bl-full" type={'text'}/>
                   <button onClick={event => suggestWord(event)} className="bg-black text-white w-24 h-10 rounded-tr-full rounded-br-full text-xl font-bold">Send</button>
                 </div>
+                { errorText && 
+                    <h1 className="text-red-500 text-2xl text-center">Le mot ne doit contenir ni caractères spéciaux, ni accents !</h1>
+                  }
             </div>
         </div>
     )

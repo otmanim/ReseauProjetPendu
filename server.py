@@ -186,6 +186,10 @@ async def handler(websocket):
                 case 'beReady':
                     break
 
+                case 'endGame':
+                    print('petite break')
+                    break
+
                 case 'changeDifficulty':
                     if (isInGroupe == True):
                         if choice['difficulty'] == 'EASY':
@@ -388,6 +392,14 @@ async def playClassicModCoop(websocket, name, nbEssais):
                 }
                 await member.get('websocket').send(json.dumps(turnToSend))
             print(name + ' : Message de réponse envoyé')
+            if countNumberLetterRemain(name, True) == 0:
+                gameCoop['isWin'] = True
+                response = {
+                    "type": "wordSuggested",
+                    "isInWord": 'y',
+                }
+                await websocket.send(json.dumps(response))
+                await sendEndToAll(True, name)
             break
 
 async def sendEndToAll(win, name):
@@ -469,7 +481,7 @@ async def playVersusServer(websocket):
     for i in range(len(mot)):
         motCache += "-"
     # Boucle principale
-    while win == False:
+    while erreur < 9:
         listeMotEnvoyer = []
         if len(listeMotASurveiller) > 1:
             time.sleep(2)
@@ -480,6 +492,12 @@ async def playVersusServer(websocket):
         if lettresRestantes == 0:
             win = True
             print('Vous avez gagné !')
+            response = {
+                "type": "endServer",
+                "win": True,
+            }
+            await websocket.send(json.dumps(response))
+            break
         if win == False:
             lettre = clavierSelonFrenquence[indexLettre]
             while not verifLettreUtile(listeMotASurveiller, lettre):
