@@ -151,11 +151,11 @@ async def handler(websocket):
                         print("server case playClassicMod = " +
                               str(choice["versus"]))
                         if choice["versus"] == False:
+                            await resetGame()
                             await playClassicModCoop(websocket, name, nbEssais)
                         else:
                             await playClassicModSolo(websocket, name, nbEssais, True)
                     else:
-                        await resetGame()
                         await playClassicModSolo(websocket, name, nbEssais, False)
                     break
 
@@ -181,6 +181,9 @@ async def handler(websocket):
 
                 case 'joinGroupe':
                     print(name + ' : Demande de groupe RECUE')
+                    break
+            
+                case 'beReady':
                     break
 
                 case 'changeDifficulty':
@@ -297,13 +300,8 @@ async def playClassicModSolo(websocket, name, nbEssais, versus):
                     timeOut = True
                     print("Le mot a été trouvé")
                     if versus:
-                        for member in groupe:
-                            if member['name'] != name:
-                                lose = {
-                                    "type": "lose",
-                                    "isInWord": "y"
-                                }
-                                await member["websocket"].send(json.dumps(lose))
+                        await sendEndToAll(False, name)
+                        groupWord = ''
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
             print('Message de réponse bien construit')
@@ -311,10 +309,19 @@ async def playClassicModSolo(websocket, name, nbEssais, versus):
             print("isinwordddddd : " + response['isInWord'])
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
+            if countNumberLetterRemain(name, False) == 0:
+                timeOut = True
+                response = {
+                    "type": "wordSuggested",
+                    "isInWord": 'y',
+                }
+                await websocket.send(json.dumps(response))
+                if versus:
+                    await sendEndToAll(False, name)
             break
     print('Fin de partie')
 
-
+#Fonction de mode de jeu en cooperation 
 async def playClassicModCoop(websocket, name, nbEssais):
     print(name)
     global groupWord
@@ -353,7 +360,16 @@ async def playClassicModCoop(websocket, name, nbEssais):
             if response['type'] == "wordSuggested":
                 if response['isInWord'] == 'y':
                     gameCoop['isWin'] = True
+                    groupWord = ''
                     print("Le mot a été trouvé")
+                    for member in groupe:
+                            if member['name'] != name:
+                                end = {
+                                    "type": "end",
+                                    "win": True,
+                                    "isInWord": "y"
+                                }
+                                await member["websocket"].send(json.dumps(end))
             if response['isInWord'] == 'n':
                 gameCoop['nbErreur'] += 1
             print(name + ' : Message de réponse bien construit')
@@ -374,6 +390,15 @@ async def playClassicModCoop(websocket, name, nbEssais):
             print(name + ' : Message de réponse envoyé')
             break
 
+async def sendEndToAll(win, name):
+    for member in groupe:
+        if member['name'] != name:
+            end = {
+                "type": "end",
+                "win": win,
+                "isInWord": "y"
+            }
+            await member["websocket"].send(json.dumps(end))
 
 async def manageLetter(message, name, word, coop, incorrectGuesses, nbEssais):
     event = json.loads(message)
@@ -599,6 +624,13 @@ async def playGeoHangmanSolo(websocket, name):
                 incorrectGuesses += 1
             await websocket.send(json.dumps(response))
             print('Message de réponse envoyé')
+            if countNumberLetterRemain(name, False) == 0:
+                end = True
+                response = {
+                    "type": "wordSuggested",
+                    "isInWord": 'y',
+                }
+                await websocket.send(json.dumps(response))
             break
 
 
@@ -640,6 +672,9 @@ def updateGameString(name, gameStringSolo, coop):
         for member in groupe:
             member['word'] = gameStringSolo
 
+def countNumberLetterRemain(name, coop):
+    gameString = getGameString(name, coop)
+    return gameString.count('-')
 
 def getGameString(name, coop):
     if coop == False:

@@ -28,6 +28,7 @@ export default function Controller() {
   const {gameManagement, setGameManagement} = useAppContext(); 
   gameManagement.websocket = client
 
+  
   function selectGameMod(step){
     switch(step){
       case 2 :
@@ -43,6 +44,17 @@ export default function Controller() {
         return 'playGeoHangman'
         break;
     }
+  }
+
+  function resetGameParameters(){
+    gameManagement.playerStatut = 'ingame'
+    gameManagement.gameStatut = []
+    gameManagement.nbError = 0
+    gameManagement.nbEssaisRestants = 8
+    gameManagement.timeOut = false
+    gameManagement.hints = []
+    gameManagement.win = false
+    setGameManagement({...gameManagement})
   }
 
 
@@ -79,11 +91,9 @@ export default function Controller() {
         console.log(gameManagement.playerList)
         break;
       case "gameModeChoice":
+        resetGameParameters()
         gameManagement.step = event.game
         gameManagement.nbEssaisRestants = event.nbEssais
-        console.log('On verifie le jeu selectionne, il s\'agit du ' + event.game)
-        console.log('Pret pour jouer au mode classique !')
-        console.log('index ici versus = '+ event.versus)
         const choice = {
           choice: selectGameMod(event.game),
           versus : event.versus
@@ -128,8 +138,14 @@ export default function Controller() {
         gameManagement.hiddenWord = event.word.split('')
         gameManagement.turn = event.turn
         break;
-      case "lose":
-        gameManagement.nbEssaisRestants = 0
+      case "end":
+        if (!event.win){
+          gameManagement.nbEssaisRestants = 0 
+        }
+        const end = {
+          type: 'endGame',
+        };
+        gameManagement.websocket.send(JSON.stringify(end))
         break;
       case "turn":
         gameManagement.turn = event.turn

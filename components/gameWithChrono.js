@@ -17,6 +17,15 @@ export default function GameScreenChrono({client}) {
           client.send(JSON.stringify(play));
       };
 
+      const suggestWord = (event) => {
+        const play = {
+            type: "play-word",
+            word: document.getElementById('wordSuggested').value,
+          };
+          client.send(JSON.stringify(play));
+          document.getElementById('wordSuggested').value = ""
+      };
+
     const clavier = [
         {letter : 'a', inWord : '?'},
         {letter : 'b', inWord : '?'},
@@ -142,6 +151,7 @@ export default function GameScreenChrono({client}) {
           </div>
           {gameManagement.nbEssaisRestants == 0 && <EndGameScreen status={'perdu'} clavier={clavier} />}
           {gameManagement.timeOut == true && <EndGameScreen status={'perdu'} clavier={clavier} />}
+          {gameManagement.win == true && <EndGameScreen status={'gagne'} clavier={clavier} />}
             <div className="flex h-1/2">
                 <div className="w-1/2">
                     {pendu.slice(0, gameManagement.nbError).map(
@@ -175,8 +185,8 @@ export default function GameScreenChrono({client}) {
                     )}
                 </div>
                 <div className="flex ml-[500px]">
-                  <input className="w-80 h-10 text-3xl text-center rounded-tl-full rounded-bl-full" type={'text'}/>
-                  <button className="bg-black text-white w-24 h-10 rounded-tr-full rounded-br-full text-xl font-bold">Send</button>
+                  <input id="wordSuggested" className="w-80 h-10 text-3xl text-center rounded-tl-full rounded-bl-full" type={'text'}/>
+                  <button onClick={event => suggestWord(event)} className="bg-black text-white w-24 h-10 rounded-tr-full rounded-br-full text-xl font-bold">Send</button>
                 </div>
             </div>
         </div>
