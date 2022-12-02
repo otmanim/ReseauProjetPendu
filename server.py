@@ -446,9 +446,6 @@ async def playVersusServer(websocket):
     indexLettre = 0
     clavierSelonFrenquence = ['e', 'a', 'i', 's', 'n', 'r', 't', 'o', 'l', 'u', 'd',
                               'c', 'm', 'p', 'g', 'b', 'v', 'h', 'f', 'q', 'y', 'x', 'j', 'k', 'w', 'z', ]
-    message = await websocket.recv()
-    event = json.loads(message)
-    mot = event["word"]
     listeMotASurveiller = []
     tailleListe = 0
     nbVoyellesTrouvees = 0
@@ -465,11 +462,22 @@ async def playVersusServer(websocket):
         listeMotASurveiller.append(line.strip().lower())
     existe = False
     while existe == False:
+        message = await websocket.recv()
+        event = json.loads(message)
+        mot = event["word"]
         if mot.lower() in listeMotASurveiller:
             print('Votre mot est : ' + mot)
+            response = {
+                'type': 'serverValidation',
+            }
+            await websocket.send(json.dumps(response))
             existe = True
         else:
             print('Votre mot n\'existe pas, veuillez en choisir un autre.')
+            response = {
+                'type': 'serverError',
+            }
+            await websocket.send(json.dumps(response))
     print('Il contient : ' + str(len(mot)) + " lettres")
     print('\n')
     listeMotASurveiller = []

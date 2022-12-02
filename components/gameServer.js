@@ -166,7 +166,10 @@ export default function GameScreenServer({client}) {
             <div className="flex ml-[500px]">
                   <input id="mot" className="w-80 h-10 text-3xl text-center rounded-tl-full rounded-bl-full" type={'text'}/>
                   <button onClick={event => handleClick()} className="bg-black text-white w-24 h-10 rounded-tr-full rounded-br-full text-xl font-bold">Send</button>
-                </div>
+            </div>
+            {gameManagement.timeOut == true && 
+              <h1 className="text-red-500 text-2xl text-center">Votre mot n'existe pas !</h1>
+            }
             <div>
                 <div className="flex flex-wrap ml-10 mt-16">
                     {gameManagement.gameStatut[0].clavier.map((letter,i) => 

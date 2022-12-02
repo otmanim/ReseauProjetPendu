@@ -13,7 +13,7 @@ import GameScreenGeoHangman from '../components/gameGeoHangman';
 import GameScreenServer from '../components/gameServer';
 import GameScreenChrono from '../components/gameWithChrono';
 
-const client = new W3CWebSocket('ws://192.168.1.33:8001');
+const client = new W3CWebSocket('ws://172.20.10.4:8001');
 //const client = new WebSocket('ws://127.0.0.1:8001')
 
 
@@ -133,6 +133,12 @@ export default function Controller() {
         break;
       case "hints":
         gameManagement.hints = [event.first, event.second, event.third]
+        break;
+      case "serverError":
+        gameManagement.timeOut = true
+        break;
+      case "serverValidation":
+        gameManagement.timeOut = false
         break;
       case "word":
         gameManagement.hiddenWord = event.word.split('')
