@@ -1,11 +1,7 @@
-import { ReactDOM } from 'react-dom'
 import React, { Component } from 'react'
 import { w3cwebsocket as W3CWebSocket } from 'websocket'
-import {useRef} from 'react';
-import { useState } from 'react';
 import Notification from '../components/notification'
 import { useAppContext } from './_app';
-import { motion } from 'framer-motion';
 import Login from '../components/login';
 import Home from '../components/home';
 import GameScreen from '../components/game';
@@ -13,15 +9,8 @@ import GameScreenGeoHangman from '../components/gameGeoHangman';
 import GameScreenServer from '../components/gameServer';
 import GameScreenChrono from '../components/gameWithChrono';
 
-const client = new W3CWebSocket('ws://172.20.10.4:8001');
-//const client = new WebSocket('ws://127.0.0.1:8001')
-
-
-//On va ajouter un array de notif (peut etre en usecontext ?? à voir) et ajouter une notif à chaque fois quon reçoit
-//un msg de connexion (normalement ça marche mon pote)
-
-
-
+//C'est ici qu'il faut modifier l'adresse ip afin de jouer avec le serveur.
+const client = new W3CWebSocket('ws://192.168.1.33:8001');
 
 export default function Controller() {
 
@@ -33,16 +22,12 @@ export default function Controller() {
     switch(step){
       case 2 :
         return 'playClassicMod'
-        break;
       case 3 :
         return 'playVersusServer'
-        break;
       case 4 :
         return 'playWithTime'
-        break;
       case 5 :
         return 'playGeoHangman'
-        break;
     }
   }
 
@@ -64,7 +49,6 @@ export default function Controller() {
       case "connection":
         gameManagement.newNotif.push({id: event.id, type : 'New Connection', content : event.player + ' join the server'})
         gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: '', image: event.image})
-        gameManagement.playerID = event.id
         break;
       case "getPlayers":
         gameManagement.playerList.push({name : event.player, statut: event.statut, inGroupOf: event.inGroupOf, image: event.image})
@@ -79,7 +63,6 @@ export default function Controller() {
         })
         gameManagement.isLeader = 'true'
         gameManagement.groupeLeader = event.player
-        console.log('CREATION DE GROUPE DE '+ event.name + ' / IsLeader = true')
         break;
       case "newMember":
         gameManagement.playerList.map((player, index)=>{
@@ -88,7 +71,6 @@ export default function Controller() {
             gameManagement.groupeLeader = event.leader
         })
         gameManagement.isLeader = 'false'
-        console.log(gameManagement.playerList)
         break;
       case "gameModeChoice":
         resetGameParameters()
@@ -99,7 +81,6 @@ export default function Controller() {
           versus : event.versus
         };
         gameManagement.websocket.send(JSON.stringify(choice))
-        console.log('Procédure terminée!')
         break;
       case "play":
         gameManagement.gameStatut[0].clavier[event.index].inWord = event.isInWord
@@ -145,7 +126,6 @@ export default function Controller() {
         gameManagement.turn = event.turn
         break;
       case "end":
-        console.log('BIG WIN = ' + event.win)
         if (!event.win){
           gameManagement.nbEssaisRestants = 0 
         }
@@ -158,7 +138,6 @@ export default function Controller() {
         gameManagement.websocket.send(JSON.stringify(end))
         break;
       case "endServer":
-        console.log('BIG WIN = ' + event.win)
         if (!event.win){
           gameManagement.nbEssaisRestants = 0 
         }
@@ -168,13 +147,11 @@ export default function Controller() {
         break;
       case "turn":
         gameManagement.turn = event.turn
-        console.log(gameManagement.name + " : " + gameManagement.turn)
         break;
       default:
         throw new Error(`Unsupported event type: ${event.type}.`);
     }
     setGameManagement({...gameManagement})
-    console.log("game = " + gameManagement.win)
   };
   
   

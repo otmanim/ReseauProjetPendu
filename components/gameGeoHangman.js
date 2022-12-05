@@ -81,8 +81,6 @@ export default function GameScreenGeoHangman({client}) {
 
     gameManagement.gameStatut.push({id :1 ,clavier : clavier})
 
-    console.log(gameManagement.gameStatut)
-
     const socle = {
         width: '150px',
         height: '10px',

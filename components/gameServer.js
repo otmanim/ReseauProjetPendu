@@ -4,7 +4,7 @@ import EndGameScreen from "./endGame";
 
 
 export default function GameScreenServer({client}) {
-//ATTENTION MON POTE FAIT GAFFE : SI LE CLAVIER EST PAS RESET AVANT CHAQUE DEBUT DE PARTIE
+
     const {gameManagement, setGameManagement} = useAppContext();
 
     const handleClick = () => {
@@ -45,8 +45,6 @@ export default function GameScreenServer({client}) {
     ]
 
     gameManagement.gameStatut.push({id :1 ,clavier : clavier})
-
-    console.log(gameManagement.gameStatut)
 
     const socle = {
         width: '150px',

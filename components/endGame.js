@@ -1,6 +1,5 @@
 import { motion } from "framer-motion"
 import { useAppContext } from '../pages/_app';
-import ButtonHome from "./button/buttonHome";
 
 export default function EndGameScreen({status, clavier}){
     const {gameManagement, setGameManagement} = useAppContext();

@@ -24,7 +24,6 @@ export default function DifficultyButton({difficulty, selected}){
             difficulty: difficulty
           };
           gameManagement.websocket.send(JSON.stringify(change));
-        console.log(gameManagement.difficulty)
       };
     
     return (

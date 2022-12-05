@@ -6,15 +6,6 @@ export default function Timer({time, client}){
   const [isActive, setIsActive] = useState(true);
   const {gameManagement, setGameManagement} = useAppContext();
 
-  function toggle() {
-    setIsActive(!isActive);
-  }
-
-  function reset() {
-    setSeconds(0);
-    setIsActive(false);
-  }
-
   useEffect(() => {
     let interval = null;
     clearInterval(interval);

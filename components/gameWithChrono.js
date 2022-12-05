@@ -6,7 +6,7 @@ import Timer from "./Timer";
 
 
 export default function GameScreenChrono({client}) {
-//ATTENTION MON POTE FAIT GAFFE : SI LE CLAVIER EST PAS RESET AVANT CHAQUE DEBUT DE PARTIE
+
     const {gameManagement, setGameManagement} = useAppContext();
     const [errorText, setErrorText] = useState(false)
     var format = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~éèçà]/;
@@ -65,8 +65,6 @@ export default function GameScreenChrono({client}) {
     ]
 
     gameManagement.gameStatut.push({id :1 ,clavier : clavier})
-
-    console.log(gameManagement.gameStatut)
 
     const socle = {
         width: '150px',

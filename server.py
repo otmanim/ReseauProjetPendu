@@ -4,26 +4,27 @@ import websockets
 import random
 import time
 
-# Variables globales auquelles auront accès tous les joueurs
-connected = []  # Liste de tous les joueurs connectés définis par leur nom, leur websocket ainsi que leur statut
-# allGroupes = [] #Ensemble de tous les groupes créés défini par un leader et un groupe
+# -------------- Variables globales auquelles auront accès tous les joueurs -------------
+# Liste de tous les joueurs connectés définis par leur nom, leur websocket ainsi que leur statut
+connected = [] 
 # On stockera le nom, websocket des membres du groupe, leur role (chef ou membre) ainsi que le mot à trouver
-groupe = []
+groupe = [] 
+# L'ensemble des paramètres d'une partie multijoueur
 gameCoop = {'turn': "", 'idActif': 0,
             'nbErreur': 0, 'isWin': False, 'nbEssais': 8}
-# Inventaire des parties en cours et de leur déroulement (seulement les parties en groupe)
-games = []
-inGroupe = None
+# Liste de mot pouvant être choisi par le serveur
 words = [
     'muscle', 'chat', 'bouger', 'corps', 'amour',
     'voiture', 'strict', 'addition', 'sante', 'balle',
     'chien', 'malade', 'froid', 'chaud', 'reel'
 ]
-
+# Mot tiré au sort pour une partie en multijoueur (mis en global pour que tout le monde y ait accès)
 global groupWord
 groupWord = ""
 
 
+# -------------- FONCTIONS DU SERVEUR -------------
+# Fonction principale lors du lancement du serveur
 async def handler(websocket):
 
     isInGroupe = False
@@ -58,8 +59,6 @@ async def handler(websocket):
         await connection.get('websocket').send(json.dumps(event))
 
     # On envoie au nouveau joueur la liste des anciens joueurs
-    # On boucle sur la liste des connectés et envoie au websocket unique tous les éléments dont le nom =/= au nom en local
-    # TO DO : Récupérer les groupes ainsi que leur leader
     for connection in connected:
         if (connection.get('name') != name):
             event = {
@@ -76,26 +75,18 @@ async def handler(websocket):
         # Le serveur reste en attente d'un envoie du client pour savoir vers où il doit se diriger, plusieurs possibilité :
         # - groupeInvitation : Un joueur a envoyé une invitation à un autre joueur pour qu'il rejoigne son groupe
         # - groupeRespond : réponse d'un client suite à une demande de groupe envoyé par le client actuel
-        # - playClassicMod : Création d'une partie classique. Attention, il faut vérifier si le joueur est impliqué dans un
-        #                    groupe ou non. Si c'est le cas alors il faut lancer la fonction playClassicModGroupe. Sinon
-        #                    playClassicModSolo
-        # - playVersusServer :
-        # - playWithTime :
-        # - playGeoHangman :
-        # - playTheme
-        # - ATTENTION : ne pas oublier d'envoyer la step à tous les joueurs présents dans le groupe
-        print(name + ' : DEBUT DE LA BOUCLE PRINCIPALE')
-        # playerChoice = await websocket.recv()
+        # - playClassicMod : Création d'une partie classique.
+        # - playVersusServer : Création d'une partie contre le serveur.
+        # - playWithTime : Création d'une partie avec temps.
+        # - playGeoHangman : Création d'une partie geo hangman.
         async for playerChoice in websocket:
             choice = json.loads(playerChoice)
             match choice["choice"]:
 
                 case 'groupeInvitation':
-                    print(name + ' : Demande de groupe en cours de traitement')
+                    print(name + ' : Demande de groupe')
                     if (len(groupe) == 0):
-                        print(name + ' : Groupe créé')
                         isInGroupe = True
-                        isLeader = True
                         groupe.append(
                             {"name": name, "websocket": websocket, "role": 'leader', "word": ''})
                         for connection in connected:
@@ -105,51 +96,35 @@ async def handler(websocket):
                                 "type": "newGroupe",
                                 "player": name,
                             }
-                            print(name + ' Etat de inGroupOf ' +
-                                  connection.get('inGroupOf'))
-                            print(
-                                name + ' Envoie de la notification de nouveau groupe à '+connection.get('name'))
                             await connection.get('websocket').send(json.dumps(newGroupe))
                     await inviteOtherPlayer(name, choice["playerName"])
                     break
 
                 case 'groupeResponse':
-                    print(name + ' : Reponse reçue')
+                    print(name + ' : Reponse de groupe reçue')
                     if (choice["response"] == 'accepte'):
                         isInGroupe = True
                         await handleGroupeJoining(name, websocket)
                     break
 
                 case 'leaderChoice':
-                    print(
-                        name + ' : Choice du mode de jeu du leader reçu, il s\'agit du ' + str(choice["step"]))
+                    print( name + ' : Choice du mode de jeu du leader reçu, il s\'agit du ' + str(choice["step"]))
                     gameMode = {
                         "type": "gameModeChoice",
                         "game": choice["step"],
                         "nbEssais": nbEssais,
                         "versus": choice["versus"]
                     }
-                    print("server la valeur de versus est : " +
-                          str(choice["versus"]))
                     if (isInGroupe):
-                        print(
-                            name + ' : Si dans un groupe alors envoyer à tout le monde')
                         for member in groupe:
-                            print(name + ' : envoie du mode de jeu à ' +
-                                  member.get('name'))
                             await member.get('websocket').send(json.dumps(gameMode))
                     else:
-                        print(name + ' : Pas en groupe donc on peut jouer solo')
                         await websocket.send(json.dumps(gameMode))
                     break
 
                 case 'playClassicMod':
-                    print(name + ' : PLAY CLASSIQUE')
-                    withTimer = False
-                    timer = 0
+                    print(name + ' : Lancement d\'une partie classique')
                     if (isInGroupe == True):
-                        print("server case playClassicMod = " +
-                              str(choice["versus"]))
                         if choice["versus"] == False:
                             await resetGame()
                             await playClassicModCoop(websocket, name, nbEssais)
@@ -160,19 +135,17 @@ async def handler(websocket):
                     break
 
                 case 'playVersusServer':
-                    print(name + ' : Jeu contre le server')
+                    print(name + ' : Lancement d\'une partie contre le serveur')
                     await playVersusServer(websocket)
                     break
 
                 case 'playWithTime':
-                    print(name + ' : PLAY WITH TIME')
-                    withTimer = True
-                    timer = 0
+                    print(name + ' : Lancement d\'une partie contre le temps')
                     await playClassicModSolo(websocket, name, nbEssais, False)
                     break
 
                 case 'playGeoHangman':
-                    print(name + ' : DEBUT DE PARTIE')
+                    print(name + ' : Lancement d\'une partie geoHangman')
                     if (isInGroupe == True):
                         await playClassicModCoop(websocket)
                     else:
@@ -180,14 +153,13 @@ async def handler(websocket):
                     break
 
                 case 'joinGroupe':
-                    print(name + ' : Demande de groupe RECUE')
+                    print(name + ' : Demande de groupe reçue')
                     break
             
                 case 'beReady':
                     break
 
                 case 'endGame':
-                    print('petite break')
                     break
 
                 case 'changeDifficulty':
@@ -211,25 +183,17 @@ async def handler(websocket):
                 case _:
                     break
 
-            print(name + " = Est dans un groupe ? " + str(isInGroupe))
-            print(groupe)
-        print("finDuServ")
-
-# Fonction à appeler lorsqu'un joueur tente d'inviter un autre joueur à son groupe.
-# On commence par vérifier si ce joueur existe puis on lui envoie une invitation
-
-
+# Fonction qui permet de remettre les réinitialiser les paramètre de jeu pour un groupe
 async def resetGame():
     gameCoop['turn'] = ''
     gameCoop['idActif'] = 0
     gameCoop['nbErreur'] = 0
     gameCoop['isWin'] = False
 
-
+# Fonction qui permet d'inviter un autre joueur à son groupe
 async def inviteOtherPlayer(name, nameOtherPlayer):
     for connection in connected:
         if (connection.get('name') == nameOtherPlayer):
-            print(name + ' : Autre joueur trouvé')
             invitation = {
                 "type": "groupeInvitation",
                 "player": name,
@@ -237,10 +201,6 @@ async def inviteOtherPlayer(name, nameOtherPlayer):
             await connection.get('websocket').send(json.dumps(invitation))
 
 # Fonction à appeler lorsqu'un joueur tente de rejoindre le groupe d'un autre joueur.
-# On y récupère sa réponse, et on l'ajoute au groupe + notifie tous les autres joueurs du groupe de son arrivée
-# Il faut aussi gérer le changement de la liste des player dans le js en ajoutant des attributs inGroupeOf
-
-
 async def handleGroupeJoining(name, websocket):
     groupe.append({"name": name, "websocket": websocket,
                   "role": 'member', "word": ''})
@@ -257,18 +217,15 @@ async def handleGroupeJoining(name, websocket):
         "name": name,
         "leader": leader
     }
-    print(name + ' : le leader est ' + leader)
     for member in connected:
         await member.get('websocket').send(json.dumps(joining))
-        print(name + ' : Notification de nouveau membre envoyé à ' +
-              member.get('name'))
 
 
 # -------------------------------------------------------------------
 # ----------------------JEU CLASSIQUE--------------------------------
 # -------------------------------------------------------------------
 
-# Fonction de jeu classique en groupe (Attention : on ne cherche plus les joueur dans la liste des connectés mais du groupe)
+# Fonction de jeu classique (Cette fonction gère aussi le jeu en versus et avec le temps)
 async def playClassicModSolo(websocket, name, nbEssais, versus):
     word = ""
     if versus:
@@ -278,7 +235,7 @@ async def playClassicModSolo(websocket, name, nbEssais, versus):
         word = groupWord
     else:
         word = randomWord()
-    print("LE MOT EST " + word)
+    print("Le mot est : " + word)
     gameStringSolo = ""
     incorrectGuesses = 0
     timeOut = False
@@ -293,26 +250,19 @@ async def playClassicModSolo(websocket, name, nbEssais, versus):
     await websocket.send(json.dumps(wordToSend))
     while incorrectGuesses < nbEssais and not timeOut:
         async for message in websocket:
-            print('Debut du tour')
             response = await manageLetter(message, name, word, False, incorrectGuesses, nbEssais-1)
             if response == "timeOut":
                 timeOut = True
-                print("fin du chrono")
                 break
             if response['type'] == "wordSuggested":
                 if response['isInWord'] == 'y':
                     timeOut = True
-                    print("Le mot a été trouvé")
                     if versus:
                         await sendEndToAll(False, name)
                         groupWord = ''
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
-            print('Message de réponse bien construit')
-            print("le type de la reponse : " + response['type'])
-            print("isinwordddddd : " + response['isInWord'])
             await websocket.send(json.dumps(response))
-            print('Message de réponse envoyé')
             if countNumberLetterRemain(name, False) == 0:
                 timeOut = True
                 response = {
@@ -323,49 +273,38 @@ async def playClassicModSolo(websocket, name, nbEssais, versus):
                 if versus:
                     await sendEndToAll(False, name)
             break
-    print('Fin de partie')
 
-#Fonction de mode de jeu en cooperation 
+#Fonction de mode de jeu classique en cooperation 
 async def playClassicModCoop(websocket, name, nbEssais):
-    print(name)
     global groupWord
     if groupWord == "":
         groupWord = randomWord()
-    print("LE MOT EST " + groupWord)
-    # word = randomWord()
+    print("Le mot est : " + groupWord)
     gameString = ''
     for i in range(len(groupWord)):
         gameString += "-"
     for member in groupe:
-        print(member['role'] + " : " + member['name'])
         member['word'] = gameString
     erreur = 0
     if gameCoop['turn'] == "":
         gameCoop['turn'] = groupe[1]['name']
         gameCoop['idActif'] = 1
-    turn = gameCoop['turn']
     while gameCoop['nbErreur'] < gameCoop['nbEssais'] and not gameCoop['isWin']:
-        print(name + " : turn = " + gameCoop['turn'])
-        print("name = " + name)
         if gameCoop['turn'] == name:
-            print(name + " : C\'est mon tour !")
             for member in groupe:
                 turnToSend = {
                     "type": "turn",
                     "turn": gameCoop['turn']
                 }
                 await member.get('websocket').send(json.dumps(turnToSend))
-        print(name + " : Ca attend le feu vert EN BALLE")
         async for message in websocket:
             if gameCoop['isWin'] == True:
                 break
-            print(name + " : Debut du tour")
             response = await manageLetter(message, erreur, groupWord, True, gameCoop['nbErreur'], gameCoop['nbEssais']-1)
             if response['type'] == "wordSuggested":
                 if response['isInWord'] == 'y':
                     gameCoop['isWin'] = True
                     groupWord = ''
-                    print("Le mot a été trouvé")
                     for member in groupe:
                             if member['name'] != name:
                                 end = {
@@ -376,13 +315,10 @@ async def playClassicModCoop(websocket, name, nbEssais):
                                 await member["websocket"].send(json.dumps(end))
             if response['isInWord'] == 'n':
                 gameCoop['nbErreur'] += 1
-            print(name + ' : Message de réponse bien construit')
             if gameCoop['idActif'] < len(groupe)-1:
                 gameCoop['idActif'] += 1
-                print(name + ' : changement de tour effectué')
             else:
                 gameCoop['idActif'] = 0
-                print(name + ' : changement de tour effectué dans le else')
             gameCoop['turn'] = groupe[gameCoop['idActif']]['name']
             for member in groupe:
                 await member.get('websocket').send(json.dumps(response))
@@ -391,7 +327,6 @@ async def playClassicModCoop(websocket, name, nbEssais):
                     "turn": gameCoop['turn']
                 }
                 await member.get('websocket').send(json.dumps(turnToSend))
-            print(name + ' : Message de réponse envoyé')
             if countNumberLetterRemain(name, True) == 0:
                 gameCoop['isWin'] = True
                 response = {
@@ -402,6 +337,7 @@ async def playClassicModCoop(websocket, name, nbEssais):
                 await sendEndToAll(True, name)
             break
 
+# Fonction permettant d'envoyer un message de fin de partie à tous les membres du groupe : à utiliser uniquement en mode multi
 async def sendEndToAll(win, name):
     for member in groupe:
         if member['name'] != name:
@@ -412,6 +348,7 @@ async def sendEndToAll(win, name):
             }
             await member["websocket"].send(json.dumps(end))
 
+# Fonction permettant le traitement de la réponse du client (on vérifie si la proposition fait parti du mot)
 async def manageLetter(message, name, word, coop, incorrectGuesses, nbEssais):
     event = json.loads(message)
     response = None
@@ -447,8 +384,6 @@ async def playVersusServer(websocket):
     clavierSelonFrenquence = ['e', 'a', 'i', 's', 'n', 'r', 't', 'o', 'l', 'u', 'd',
                               'c', 'm', 'p', 'g', 'b', 'v', 'h', 'f', 'q', 'y', 'x', 'j', 'k', 'w', 'z', ]
     listeMotASurveiller = []
-    tailleListe = 0
-    nbVoyellesTrouvees = 0
     motCache = ''
     lettresTrouvees = 0
     lettresRestantes = 0
@@ -473,19 +408,15 @@ async def playVersusServer(websocket):
             await websocket.send(json.dumps(response))
             existe = True
         else:
-            print('Votre mot n\'existe pas, veuillez en choisir un autre.')
             response = {
                 'type': 'serverError',
             }
             await websocket.send(json.dumps(response))
-    print('Il contient : ' + str(len(mot)) + " lettres")
-    print('\n')
     listeMotASurveiller = []
     for line in lines:
         if len(line)-1 == len(mot):
             line = line.lower().strip()
             listeMotASurveiller.append(line)
-    tailleListe = len(listeMotASurveiller)
     for i in range(len(mot)):
         motCache += "-"
     # Boucle principale
@@ -499,7 +430,6 @@ async def playVersusServer(websocket):
         lettresRestantes = len(mot) - lettresTrouvees
         if lettresRestantes == 0:
             win = True
-            print('Vous avez gagné !')
             response = {
                 "type": "endServer",
                 "win": True,
@@ -521,9 +451,6 @@ async def playVersusServer(websocket):
             listeMotASurveiller = miseAJourListeSurveiller(
                 listeMotASurveiller, motCache, lettresTrouvees)
             indexLettre += 1
-            print('Tentative avec : ' + lettre)
-            print(motCache)
-            print('Erreurs : ' + str(erreur))
             if (len(listeMotASurveiller) > 6):
                 listeMot = listeMotASurveiller[0]
                 listeMotEnvoyer.append(listeMotASurveiller[0])
@@ -532,15 +459,12 @@ async def playVersusServer(websocket):
                     listeMotEnvoyer.append(listeMotASurveiller[i])
                 listeMotEnvoyer.append(
                     'et ' + str(len(listeMotASurveiller) - 6) + ' autres mots.')
-                print('Mots correspondants : ' + listeMot + ' et ' +
-                      str(len(listeMotASurveiller) - 6) + ' autres mots.')
             else:
                 listeMot = listeMotASurveiller[0]
                 listeMotEnvoyer.append(listeMotASurveiller[0])
                 for i in range(1, len(listeMotASurveiller)):
                     listeMot += ', ' + listeMotASurveiller[i]
                     listeMotEnvoyer.append(listeMotASurveiller[i])
-                print('Mots correspondants : ' + listeMot + '.')
             response = {
                 "type": "playServer",
                 "letter": lettre,
@@ -550,15 +474,6 @@ async def playVersusServer(websocket):
                 "motPossibles": listeMotEnvoyer
             }
             await websocket.send(json.dumps(response))
-            print('\n')
-
-
-def verifLettreDansMot(lettre, mot, i):
-    mot = list(mot)
-    if lettre == mot[i]:
-        return True
-    else:
-        return False
 
 
 def changerMotCache(lettre, motCache, mot):
@@ -605,17 +520,15 @@ def verifLettreUtile(listeMotASurveiller, lettre):
 # ----------------------JEU GEO HANGMAN------------------------------
 # -------------------------------------------------------------------
 
-
+# On choisi le lieu géographique qui sera à deviner
 async def pickGeoToGuess():
-    # En premier, nous devons selectionner une zone geographique a faire deviner
     lineToPick = random.randint(0, 21)
     with open(r"./data/geohangman.txt", 'r') as fp:
         for i, line in enumerate(fp):
-            # read line 4 and 7
             if i == lineToPick:
                 return line
 
-
+#Fonction de mode de jeu geoHangman 
 async def playGeoHangmanSolo(websocket, name):
     end = False
     gameStringSolo = ''
@@ -639,17 +552,13 @@ async def playGeoHangmanSolo(websocket, name):
     await websocket.send(json.dumps(wordToSend))
     while incorrectGuesses < 8 and not end:
         async for message in websocket:
-            print('Debut du tour')
             response = await manageLetter(message, name, geoLine[0].lower(), False, incorrectGuesses, 7)
             if response['type'] == "wordSuggested":
                 if response['isInWord'] == 'y':
                     end = True
-                    print("Le mot a été trouvé")
-            print('Message de réponse bien construit')
             if response['isInWord'] == 'n':
                 incorrectGuesses += 1
             await websocket.send(json.dumps(response))
-            print('Message de réponse envoyé')
             if countNumberLetterRemain(name, False) == 0:
                 end = True
                 response = {
@@ -658,16 +567,6 @@ async def playGeoHangmanSolo(websocket, name):
                 }
                 await websocket.send(json.dumps(response))
             break
-
-
-async def joinGroup(websocket):
-    # mainPlayer.remove(websocket)
-    inGroupe = websocket
-    event = {
-        "type": 'joinGroup',
-    }
-    for connection in connected:
-        await connection.send()
 
 
 def isInWord(letter, name, word, coop):
@@ -692,11 +591,11 @@ def updateGameString(name, gameStringSolo, coop):
     if coop == False:
         for player in connected:
             if player['name'] == name:
-                # print("le name : " + name)
                 player["word"] = gameStringSolo
     else:
         for member in groupe:
             member['word'] = gameStringSolo
+
 
 def countNumberLetterRemain(name, coop):
     gameString = getGameString(name, coop)
@@ -706,7 +605,6 @@ def getGameString(name, coop):
     if coop == False:
         for player in connected:
             if player['name'] == name:
-                # print("le name : " + name)
                 return player['word']
     else:
         return groupe[0]['word']

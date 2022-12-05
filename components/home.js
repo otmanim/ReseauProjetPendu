@@ -1,10 +1,8 @@
 import PlayerList from "./navigation/playerList"
 import ButtonHome from "./button/buttonHome"
-import { motion } from "framer-motion"
 import { useAppContext } from '../pages/_app';
 import React, { useState } from 'react';
 import DifficultyButton from "./difficultyButton";
-import Timer from "./Timer";
 
 export default function Home() {
 
